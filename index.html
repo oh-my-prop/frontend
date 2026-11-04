@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111b1a">
+  <title>손실 한도 시뮬레이터 | Oh My Prop</title>
+  <link rel="stylesheet" href="./src/style.css">
+  <script type="module" src="./src/app.js"></script>
+  <script type="module" src="./src/reset-ui.js"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="Oh My Prop 홈"><span class="brand-mark" aria-hidden="true">P<span>.</span></span><span>OH MY PROP <small>프랍 트레이딩 연습</small></span></a>
+      <span class="header-tag"><span aria-hidden="true"></span> EDUCATIONAL TOOL</span>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="page-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span>01</span> &nbsp; / &nbsp; TRADING RISK SIMULATOR</p>
+          <h1 id="page-title">손실 한도,<br><em>숫자로 먼저</em> 확인하세요.</h1>
+          <p class="hero-description">가상의 계좌와 고정 손실 규칙으로 여유 금액을 살펴보세요. 거래를 시작하기 전, 리스크를 이해하기 위한 연습 도구입니다.</p>
+          <p><a href="./journal.html">가상 거래 연습장 열기 →</a></p>
+        </div>
+        <div class="hero-note"><span class="note-icon" aria-hidden="true">✳</span><p><strong>연습을 위한 시뮬레이션</strong><br>실제 거래나 규정 준수 판정이 아닙니다.</p></div>
+      </section>
+
+      <section class="workspace" aria-label="손실 한도 계산기">
+        <div class="input-panel">
+          <div class="section-heading"><div><p class="kicker">YOUR SCENARIO</p><h2>계좌 설정</h2><p>가상의 값을 입력해 시나리오를 만들어 보세요.</p></div><span class="step-number">01</span></div>
+          <form id="risk-form" novalidate>
+            <div class="field-group">
+              <p class="group-title"><span>01</span> 계좌 정보 <small>USD 기준</small></p>
+              <div class="field"><label for="initialBalance">초기 잔고</label><div class="input-wrap"><span aria-hidden="true">$</span><input id="initialBalance" name="initialBalance" type="text" inputmode="decimal" value="100000" autocomplete="off" aria-describedby="initial-help"></div><p class="field-help" id="initial-help">두 손실 한도 계산의 고정 기준 금액</p></div>
+              <div class="field"><label for="dailyStartEquity">일일 시작 자산</label><div class="input-wrap"><span aria-hidden="true">$</span><input id="dailyStartEquity" name="dailyStartEquity" type="text" inputmode="decimal" value="100000" autocomplete="off"></div></div>
+              <div class="field"><label for="currentEquity">현재 자산 <span class="label-sub">Equity</span></label><div class="input-wrap"><span aria-hidden="true">$</span><input id="currentEquity" name="currentEquity" type="text" inputmode="decimal" value="98500" autocomplete="off" aria-describedby="equity-help"></div><p class="field-help" id="equity-help">미실현 손익을 포함한 현재 자산을 직접 입력하세요.</p></div>
+            </div>
+            <div class="field-group rules-group">
+              <p class="group-title"><span>02</span> 가상의 손실 규칙</p>
+              <div class="rule-fields"><div class="field"><label for="dailyLossPercent">일일 손실률</label><div class="input-wrap suffix"><input id="dailyLossPercent" name="dailyLossPercent" type="text" inputmode="decimal" value="5" autocomplete="off"><span aria-hidden="true">%</span></div></div><div class="field"><label for="maxLossPercent">최대 손실률</label><div class="input-wrap suffix"><input id="maxLossPercent" name="maxLossPercent" type="text" inputmode="decimal" value="10" autocomplete="off"><span aria-hidden="true">%</span></div></div></div>
+              <p class="field-help rule-help">금액은 0 이상, 비율은 0 초과 100 이하로 입력하세요. 소수점은 최대 두 자리까지 가능합니다.</p>
+            </div>
+            <p id="form-error" class="form-error" role="alert" hidden></p>
+          </form>
+        </div>
+
+        <div class="result-panel" aria-labelledby="result-title">
+          <div class="section-heading result-heading"><div><p class="kicker">YOUR RISK SNAPSHOT</p><h2 id="result-title">계산 결과</h2><p>입력값을 바꾸면 결과가 바로 업데이트됩니다.</p></div><span class="step-number">02</span></div>
+          <div id="results" aria-live="polite" aria-atomic="true">
+            <div class="primary-result" id="primary-result"><div class="primary-top"><span>가장 가까운 손실 한도까지</span><span class="status-pill" id="status-pill">계산 중</span></div><p class="primary-amount" id="limiting-remaining">—</p><p class="primary-caption" id="limiting-caption">계산 결과를 확인하고 있습니다.</p><div class="primary-bottom"><span>가상의 고정 손실 규칙</span><span>USD <span aria-hidden="true">↗</span></span></div></div>
+            <div class="result-cards"><article class="result-card"><div class="card-heading"><span class="card-icon" aria-hidden="true">↘</span><span>DAILY LOSS</span><span class="card-index">01</span></div><h3>일일 손실 한도</h3><div class="metric"><span>한도 자산</span><strong id="daily-floor">—</strong></div><div class="metric remaining"><span>한도까지 남은 금액</span><strong id="daily-remaining">—</strong></div></article><article class="result-card"><div class="card-heading"><span class="card-icon" aria-hidden="true">◇</span><span>MAX LOSS</span><span class="card-index">02</span></div><h3>최대 손실 한도</h3><div class="metric"><span>한도 자산</span><strong id="max-floor">—</strong></div><div class="metric remaining"><span>한도까지 남은 금액</span><strong id="max-remaining">—</strong></div></article></div>
+            <p class="result-footnote">남은 금액 = 현재 자산 − 한도 자산. 0 이하는 해당 한도에 도달했거나 초과했을 가능성을 뜻합니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="reset-scenario" aria-labelledby="reset-title">
+        <div class="reset-intro">
+          <p class="kicker">02 / RESET SCENARIO</p>
+          <h2 id="reset-title">리셋 전후, 달라지는 일일 기준</h2>
+          <p>공개된 FTMO 2-Step 손실 규칙에서 영감을 받은 가상 예시입니다. 일일 기준은 리셋 시점의 <strong>잔고(balance)</strong>이며, 현재 자산(equity)은 미실현 손익을 포함합니다. 두 값은 다를 수 있습니다.</p>
+          <div class="reset-caveat"><strong>교육용 단순 모델입니다.</strong> 리셋 전후 현재 자산을 동일하게 유지해 비교하며, 실제 리셋 시각이나 비용을 계산하거나 과거 장중 위반을 모니터링하지 않습니다. 실제 거래 또는 규정 준수 판정이 아니며, 최신 공식 조건이 우선합니다. <a href="https://ftmo.com/en/trading-objectives/">FTMO 공식 Trading Objectives 확인하기</a></div>
+        </div>
+        <div class="reset-workspace">
+          <form id="reset-form" class="reset-form" novalidate>
+            <h3>리셋 비교 입력</h3>
+            <p class="field-help" id="reset-input-help">USD 금액은 0 이상, 소수점 둘째 자리까지 입력하세요. 일일 5%, 최대 10%를 고정 적용합니다.</p>
+            <div class="field"><label for="reset-initial">비교용 초기 잔고</label><div class="input-wrap"><span aria-hidden="true">$</span><input id="reset-initial" name="initialBalance" type="text" inputmode="decimal" value="100000" autocomplete="off" aria-describedby="reset-input-help"></div></div>
+            <div class="field"><label for="reset-previous">이전 리셋 시점 잔고</label><div class="input-wrap"><span aria-hidden="true">$</span><input id="reset-previous" name="previousResetBalance" type="text" inputmode="decimal" value="100000" autocomplete="off" aria-describedby="reset-input-help"></div></div>
+            <div class="field"><label for="reset-new">새 리셋 시점 잔고</label><div class="input-wrap"><span aria-hidden="true">$</span><input id="reset-new" name="newResetBalance" type="text" inputmode="decimal" value="102000" autocomplete="off" aria-describedby="reset-input-help"></div></div>
+            <div class="field"><label for="reset-equity">비교용 현재 자산 <span class="label-sub">Equity</span></label><div class="input-wrap"><span aria-hidden="true">$</span><input id="reset-equity" name="currentEquity" type="text" inputmode="decimal" value="96000" autocomplete="off" aria-describedby="reset-input-help"></div></div>
+            <p id="reset-error" class="form-error" role="alert" hidden></p>
+          </form>
+          <div class="reset-output" aria-labelledby="reset-result-title">
+            <h3 id="reset-result-title">리셋 전후 비교</h3>
+            <p>남은 금액 = 현재 자산 − 한도 자산. 양수는 한도 위, 음수는 한도 아래를 뜻합니다.</p>
+            <div id="reset-results" class="reset-cards" aria-live="polite" aria-atomic="true">
+              <article class="reset-card"><p class="kicker">BEFORE RESET</p><h4>이전 리셋 기준</h4><p class="reset-equity">현재 자산 <strong id="reset-before-equity">—</strong></p>
+                <div class="reset-rule"><h5>일일 손실 한도 <span>5%</span></h5><div class="metric"><span>한도 자산</span><strong id="reset-before-daily-floor">—</strong></div><div class="metric"><span>남은 금액</span><strong id="reset-before-daily-remaining">—</strong></div><p id="reset-before-daily-status" class="reset-status"></p></div>
+                <div class="reset-rule"><h5>최대 손실 한도 <span>10%</span></h5><div class="metric"><span>한도 자산</span><strong id="reset-before-max-floor">—</strong></div><div class="metric"><span>남은 금액</span><strong id="reset-before-max-remaining">—</strong></div><p id="reset-before-max-status" class="reset-status"></p></div>
+              </article>
+              <article class="reset-card"><p class="kicker">AFTER RESET</p><h4>새 리셋 기준</h4><p class="reset-equity">현재 자산 <strong id="reset-after-equity">—</strong></p>
+                <div class="reset-rule"><h5>일일 손실 한도 <span>5%</span></h5><div class="metric"><span>한도 자산</span><strong id="reset-after-daily-floor">—</strong></div><div class="metric"><span>남은 금액</span><strong id="reset-after-daily-remaining">—</strong></div><p id="reset-after-daily-status" class="reset-status"></p></div>
+                <div class="reset-rule"><h5>최대 손실 한도 <span>10%</span></h5><div class="metric"><span>한도 자산</span><strong id="reset-after-max-floor">—</strong></div><div class="metric"><span>남은 금액</span><strong id="reset-after-max-remaining">—</strong></div><p id="reset-after-max-status" class="reset-status"></p></div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="explanation" aria-labelledby="explanation-title"><div class="explanation-intro"><p class="kicker">THE METHODOLOGY</p><h2 id="explanation-title">어떻게 계산하나요?</h2><p>실제 평가 규정이 아닌, 학습을 위한 단순한 가정입니다.</p></div><div class="explanation-grid"><article><span>01 / DAILY</span><h3>일일 손실 한도</h3><p>일일 시작 자산에서 초기 잔고에 일일 손실률을 곱한 금액을 뺍니다.</p><div>일일 시작 자산 − (초기 잔고 × 일일 손실률)</div></article><article><span>02 / MAXIMUM</span><h3>최대 손실 한도</h3><p>초기 잔고에서 초기 잔고에 최대 손실률을 곱한 금액을 뺍니다.</p><div>초기 잔고 − (초기 잔고 × 최대 손실률)</div></article><article><span>03 / IMPORTANT</span><h3>직접 확인해야 할 것</h3><p>두 한도 모두 초기 잔고를 고정 기준으로 사용합니다. 소수 센트가 발생하면 한도를 위쪽 센트로 올림합니다.</p><p>자동 갱신이나 일일 리셋 계산은 제공하지 않습니다. 현재 자산과 일일 시작 자산이 최신인지 직접 확인하세요.</p></article></div></section>
+      <aside class="disclaimer"><span aria-hidden="true">ⓘ</span><p><strong>알아두세요.</strong> 이 도구는 교육용이며 특정 업체의 규정, 실제 거래 결과 또는 규정 준수를 판정하지 않습니다. 실제 조건은 업체와 계좌의 최신 규정을 직접 확인하세요. 입력값은 이 화면에서만 사용되며 저장되지 않습니다.</p></aside>
+    </main>
+    <footer><span class="footer-brand">P<span>.</span> &nbsp; OH MY PROP</span><span>LEARN THE RISK. BEFORE THE TRADE.</span><span>교육용 시뮬레이터</span></footer>
+  </div>
+</body>
+</html>

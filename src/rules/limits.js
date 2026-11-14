@@ -26,13 +26,20 @@ function ceilDiv(a, b) {
   return a % b !== 0n && a > 0n ? q + 1n : q;
 }
 
-const lineFrom = (base, initial, limitBps) => ceilDiv(base * BPS - initial * limitBps, BPS);
+// A rule states its allowance either as a share of the initial balance or in dollars.
+const lineFrom = (base, initial, rule) => (rule.limitCents != null ? base - rule.limitCents : ceilDiv(base * BPS - initial * rule.limitBps, BPS));
 
 export function createTracker({ initialBalanceCents, rules }) {
   const initial = big(initialBalanceCents);
   return {
     initial,
-    rules: rules.filter((rule) => LOSS_KINDS.has(rule.kind)).map((rule, index) => ({ ...rule, id: rule.id ?? `${rule.kind}#${index}`, limitBps: big(rule.limitBps) })),
+    rules: rules.filter((rule) => LOSS_KINDS.has(rule.kind)).map((rule, index) => ({
+      ...rule,
+      id: rule.id ?? `${rule.kind}#${index}`,
+      limitBps: rule.limitBps == null ? null : big(rule.limitBps),
+      limitCents: rule.limitCents == null ? null : big(rule.limitCents),
+      lockOffsetCents: big(rule.lockOffsetCents ?? 0),
+    })),
     balance: initial,
     equity: initial,
     dayStartBalance: initial,
@@ -72,32 +79,35 @@ export function applyEvent(tracker, event) {
 }
 
 function ruleLine(tracker, rule) {
-  if (rule.kind === 'max_loss_static') return lineFrom(tracker.initial, tracker.initial, rule.limitBps);
+  if (rule.kind === 'max_loss_static') return lineFrom(tracker.initial, tracker.initial, rule);
   if (rule.kind === 'daily_loss') {
     const base = rule.basis === 'balance' ? tracker.dayStartBalance
       : rule.basis === 'equity' ? tracker.dayStartEquity
         : tracker.dayStartBalance > tracker.dayStartEquity ? tracker.dayStartBalance : tracker.dayStartEquity;
-    return lineFrom(base, tracker.initial, rule.limitBps);
+    return lineFrom(base, tracker.initial, rule);
   }
-  if (tracker.locked[rule.id]) return tracker.initial;
-  const line = lineFrom(tracker.peaks[rule.id] ?? tracker.initial, tracker.initial, rule.limitBps);
-  if (rule.lockAtInitial && line >= tracker.initial) {
+  const lockLevel = tracker.initial + rule.lockOffsetCents;
+  if (tracker.locked[rule.id]) return lockLevel;
+  const line = lineFrom(tracker.peaks[rule.id] ?? tracker.initial, tracker.initial, rule);
+  if (rule.lockAtInitial && line >= lockLevel) {
     tracker.locked[rule.id] = true;
-    return tracker.initial;
+    return lockLevel;
   }
   return line;
 }
 
 // Limit cards for the dashboard: line, remaining room, warning level, and which
-// rule is nearest. `reached` mirrors the server convention that equality breaches.
+// rule is nearest. `reached` mirrors the server convention that equality breaches;
+// for a soft daily limit (`enforcement: 'pause'`) reaching it pauses trading instead.
 export function limitCards(tracker) {
   const cards = tracker.rules.map((rule) => {
     const line = ruleLine(tracker, rule);
     const remaining = tracker.equity - line;
-    const allowance = tracker.initial * rule.limitBps / BPS;
+    const allowance = rule.limitCents ?? tracker.initial * rule.limitBps / BPS;
     const share = allowance > 0n ? (remaining * BPS) / allowance : 0n;
     const warning = remaining <= 0n ? 'reached' : WARNING_LEVELS.find((entry) => share <= entry.remainingBps)?.level ?? 'normal';
-    return { ruleId: rule.id, kind: rule.kind, lineCents: line, remainingCents: remaining, reached: remaining <= 0n, warning };
+    const consequence = rule.kind === 'daily_loss' && rule.enforcement === 'pause' ? 'pause' : 'breach';
+    return { ruleId: rule.id, kind: rule.kind, lineCents: line, remainingCents: remaining, reached: remaining <= 0n, consequence, warning };
   });
   const nearest = cards.reduce((best, card) => (best === null || card.remainingCents < best.remainingCents ? card : best), null);
   return { cards, nearestRuleId: nearest?.ruleId ?? null };

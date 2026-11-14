@@ -1,0 +1,14 @@
+{
+  "name": "static-fractional-cent-roundup",
+  "description": "초기 $10,000.01의 5%는 $500.0005. 한도선 $9,500.0095는 트레이더에게 보수적인 위쪽 센트 $9,500.01로 올린다.",
+  "initialBalanceCents": 1000001,
+  "rules": [{ "kind": "max_loss_static", "limitBps": 500 }],
+  "events": [
+    { "type": "mark_to_market", "equityCents": 950002 },
+    { "type": "mark_to_market", "equityCents": 950001 }
+  ],
+  "expect": [
+    { "afterEvent": 0, "ruleKind": "max_loss_static", "outcome": "none", "thresholdCents": 950001, "observedCents": 950002 },
+    { "afterEvent": 1, "ruleKind": "max_loss_static", "outcome": "breach", "thresholdCents": 950001, "observedCents": 950001 }
+  ]
+}

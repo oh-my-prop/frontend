@@ -1,0 +1,16 @@
+{
+  "name": "daily-max-balance-equity",
+  "description": "일일 손실 5%, 기준은 거래일 시작 시점의 max(잔고, 에쿼티). 시작 에쿼티 $25,200이 기준이 되어 한도선은 $25,200 − $1,250 = $23,950.",
+  "initialBalanceCents": 2500000,
+  "rules": [{ "kind": "daily_loss", "limitBps": 500, "basis": "max_balance_equity" }],
+  "events": [
+    { "type": "trading_day_started", "balanceCents": 2500000, "equityCents": 2520000 },
+    { "type": "mark_to_market", "equityCents": 2395001 },
+    { "type": "mark_to_market", "equityCents": 2395000 }
+  ],
+  "expect": [
+    { "afterEvent": 0, "ruleKind": "daily_loss", "outcome": "none", "thresholdCents": 2395000, "observedCents": 2520000 },
+    { "afterEvent": 1, "ruleKind": "daily_loss", "outcome": "none", "thresholdCents": 2395000, "observedCents": 2395001 },
+    { "afterEvent": 2, "ruleKind": "daily_loss", "outcome": "breach", "thresholdCents": 2395000, "observedCents": 2395000 }
+  ]
+}

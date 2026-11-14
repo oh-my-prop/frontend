@@ -22,7 +22,8 @@ for (const file of readdirSync(dir).filter((name) => name.endsWith('.json'))) {
     for (const expected of expectations) {
       const card = snapshots[expected.afterEvent].cards.find((item) => item.kind === expected.ruleKind);
       assert.equal(Number(card.lineCents), expected.thresholdCents, `${file} line after ${expected.afterEvent}`);
-      assert.equal(card.reached, expected.outcome === 'breach', `${file} reached after ${expected.afterEvent}`);
+      assert.equal(card.reached, ['breach', 'pause'].includes(expected.outcome), `${file} reached after ${expected.afterEvent}`);
+      if (card.reached) assert.equal(card.consequence, expected.outcome, `${file} consequence`);
     }
   });
 }

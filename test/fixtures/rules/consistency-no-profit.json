@@ -1,0 +1,15 @@
+{
+  "name": "consistency-no-profit",
+  "description": "일관성 규칙 40%. 기간 총수익이 0 이하이면 비중을 계산할 수 없으므로 위반이 아니라 지급 보류(hold)다.",
+  "initialBalanceCents": 2500000,
+  "rules": [{ "kind": "consistency", "maxDayShareBps": 4000, "scope": "payout_cycle" }],
+  "events": [
+    { "type": "position_closed", "realizedPnlCents": 50000 },
+    { "type": "trading_day_closed", "balanceCents": 2550000, "equityCents": 2550000 },
+    { "type": "position_closed", "realizedPnlCents": -50000 },
+    { "type": "trading_day_closed", "balanceCents": 2500000, "equityCents": 2500000 }
+  ],
+  "expect": [
+    { "afterEvent": 3, "ruleKind": "consistency", "outcome": "hold", "note": "총수익 0 → 분모 0, 비중 계산 불가" }
+  ]
+}

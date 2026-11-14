@@ -1,0 +1,20 @@
+{
+  "name": "trailing-eod-lock-at-initial",
+  "description": "종가 기준 추적형 최대 손실 6%($1,500). 최고 마감 에쿼티를 따라 한도선이 오르다가 초기 잔고 $25,000에 닿으면 고정된다.",
+  "initialBalanceCents": 2500000,
+  "rules": [{ "kind": "max_loss_trailing", "limitBps": 600, "mode": "end_of_day", "lockAtInitial": true }],
+  "events": [
+    { "type": "trading_day_closed", "balanceCents": 2600000, "equityCents": 2600000 },
+    { "type": "trading_day_closed", "balanceCents": 2700000, "equityCents": 2700000 },
+    { "type": "trading_day_closed", "balanceCents": 2800000, "equityCents": 2800000 },
+    { "type": "mark_to_market", "equityCents": 2500001 },
+    { "type": "mark_to_market", "equityCents": 2500000 }
+  ],
+  "expect": [
+    { "afterEvent": 0, "ruleKind": "max_loss_trailing", "outcome": "none", "thresholdCents": 2450000, "observedCents": 2600000 },
+    { "afterEvent": 1, "ruleKind": "max_loss_trailing", "outcome": "none", "thresholdCents": 2500000, "observedCents": 2700000, "note": "2,550,000이 되어야 하지만 초기 잔고에서 고정" },
+    { "afterEvent": 2, "ruleKind": "max_loss_trailing", "outcome": "none", "thresholdCents": 2500000, "observedCents": 2800000 },
+    { "afterEvent": 3, "ruleKind": "max_loss_trailing", "outcome": "none", "thresholdCents": 2500000, "observedCents": 2500001 },
+    { "afterEvent": 4, "ruleKind": "max_loss_trailing", "outcome": "breach", "thresholdCents": 2500000, "observedCents": 2500000 }
+  ]
+}

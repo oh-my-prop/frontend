@@ -1,0 +1,17 @@
+{
+  "name": "daily-dollar-pause",
+  "description": "선물형 일일 손실 한도: 금액 $1,000, 전일 마감 잔고 기준, 도달 시 계정 종료가 아니라 당일 거래 중지(pause). 다음 거래일에는 새 기준으로 다시 거래할 수 있다.",
+  "initialBalanceCents": 5000000,
+  "rules": [{ "kind": "daily_loss", "limitCents": 100000, "basis": "balance", "enforcement": "pause" }],
+  "events": [
+    { "type": "mark_to_market", "equityCents": 4900001 },
+    { "type": "mark_to_market", "equityCents": 4900000 },
+    { "type": "trading_day_closed", "balanceCents": 4900000, "equityCents": 4900000 },
+    { "type": "mark_to_market", "equityCents": 4850000 }
+  ],
+  "expect": [
+    { "afterEvent": 0, "ruleKind": "daily_loss", "outcome": "none", "thresholdCents": 4900000, "observedCents": 4900001 },
+    { "afterEvent": 1, "ruleKind": "daily_loss", "outcome": "pause", "thresholdCents": 4900000, "observedCents": 4900000 },
+    { "afterEvent": 3, "ruleKind": "daily_loss", "outcome": "none", "thresholdCents": 4800000, "observedCents": 4850000, "note": "새 거래일 기준 $49,000 − $1,000" }
+  ]
+}

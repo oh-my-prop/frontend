@@ -1,0 +1,14 @@
+{
+  "name": "static-equal-boundary",
+  "description": "고정 최대 손실 10%. 에쿼티가 한도선보다 1센트 위면 통과, 한도선과 같으면 위반(등호는 위반).",
+  "initialBalanceCents": 2500000,
+  "rules": [{ "kind": "max_loss_static", "limitBps": 1000 }],
+  "events": [
+    { "type": "mark_to_market", "equityCents": 2250001 },
+    { "type": "mark_to_market", "equityCents": 2250000 }
+  ],
+  "expect": [
+    { "afterEvent": 0, "ruleKind": "max_loss_static", "outcome": "none", "thresholdCents": 2250000, "observedCents": 2250001 },
+    { "afterEvent": 1, "ruleKind": "max_loss_static", "outcome": "breach", "thresholdCents": 2250000, "observedCents": 2250000 }
+  ]
+}

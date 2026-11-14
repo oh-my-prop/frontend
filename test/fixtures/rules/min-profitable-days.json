@@ -1,0 +1,18 @@
+{
+  "name": "min-profitable-days",
+  "description": "수익일 2일 이상 필요. 수익일은 마감된 거래일 중 순이익이 초기 잔고의 0.5%($500) 이상인 날. $499.99인 날은 세지 않는다.",
+  "initialBalanceCents": 10000000,
+  "rules": [{ "kind": "min_profitable_days", "days": 2, "minDayProfitBps": 50 }],
+  "events": [
+    { "type": "position_closed", "realizedPnlCents": 50000 },
+    { "type": "trading_day_closed" },
+    { "type": "position_closed", "realizedPnlCents": 49999 },
+    { "type": "trading_day_closed" },
+    { "type": "position_closed", "realizedPnlCents": 60000 },
+    { "type": "trading_day_closed" }
+  ],
+  "expect": [
+    { "afterEvent": 3, "ruleKind": "min_profitable_days", "outcome": "none", "note": "수익일 1일" },
+    { "afterEvent": 5, "ruleKind": "min_profitable_days", "outcome": "objective_met", "note": "수익일 2일" }
+  ]
+}

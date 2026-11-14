@@ -94,6 +94,7 @@ export function limitCards(phaseRules, results, initialBalanceCents) {
       const remaining = BigInt(result.observedCents) - BigInt(result.thresholdCents);
       return {
         ruleId: id,
+        kind: rule.kind,
         title: describeRule(rule, initialBalanceCents).title,
         lineCents: result.thresholdCents,
         remainingCents: Number(remaining),

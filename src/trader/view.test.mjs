@@ -87,3 +87,15 @@ test('status banners and event lines are human-readable', () => {
     '판정 · 규칙 위반 · 기준 $95,000.00, 관측 $93,969.39',
   );
 });
+
+test('product names, rule chips, gauges and notional are newcomer-friendly', async () => {
+  const { programName, ruleHighlights, orderNotional } = await import('./view.js');
+  assert.equal(programName('omp-season-25k'), '무료 시즌 챌린지');
+  assert.equal(programName('unknown-code'), 'unknown-code');
+  assert.deepEqual(ruleHighlights(RULES, 2500000).map((chip) => chip.text), ['하루 최대 손실 $1,250.00', '전체 최대 손실 $2,500.00', '목표 수익 +8%', '최소 4일 거래']);
+  const [daily] = limitCards(RULES, [{ ruleId: 'daily', kind: 'daily_loss', outcome: 'none', thresholdCents: 2375000, observedCents: 2400000 }], 2500000);
+  assert.equal(daily.allowanceCents, 125000);
+  assert.equal(daily.remainingPercent, 20);
+  assert.equal(orderNotional({ instrument: BTC, qty: '0.100', price: '60000.5' }), 600005);
+  assert.equal(orderNotional({ instrument: BTC, qty: 'x', price: '1' }), null);
+});

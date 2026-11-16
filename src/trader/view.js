@@ -18,6 +18,29 @@ const BASIS_TEXT = {
 const PHASE_TEXT = { season: '시즌', eval_1: '평가 1단계', eval_2: '평가 2단계', funded: '펀딩' };
 export const phaseLabel = (phase) => PHASE_TEXT[phase] ?? phase;
 
+// Friendly product names and one-line pitches. Unknown programs fall back to their code.
+const PROGRAM_TEXT = {
+  'omp-season-25k': { name: '무료 시즌 챌린지', pitch: '돈 없이 규칙만 지키며 연습하는 2주 시즌. 순위로 겨룹니다.' },
+  'omp-2step-25k': { name: '2단계 평가', pitch: '목표 수익을 두 번 달성하면 펀딩 단계로 올라가는 기본형 평가.' },
+  'omp-session-50k': { name: '세션형 평가', pitch: '하루 손실 한도에 닿으면 그날만 쉬고, 마감 전에는 포지션을 정리하는 선물사 방식.' },
+};
+export const programName = (code) => PROGRAM_TEXT[code]?.name ?? code;
+export const programPitch = (code, fallback = '') => PROGRAM_TEXT[code]?.pitch ?? fallback;
+
+// The three or four numbers a newcomer needs before opening an account.
+export function ruleHighlights(phaseRules, initialBalanceCents) {
+  const chips = [];
+  for (const rule of phaseRules) {
+    if (rule.kind === 'daily_loss') chips.push({ tone: 'risk', text: `하루 최대 손실 ${formatCents(allowanceCents(rule, initialBalanceCents))}` });
+    else if (rule.kind === 'max_loss_static') chips.push({ tone: 'risk', text: `전체 최대 손실 ${formatCents(allowanceCents(rule, initialBalanceCents))}` });
+    else if (rule.kind === 'max_loss_trailing') chips.push({ tone: 'risk', text: `고점 대비 최대 손실 ${formatCents(allowanceCents(rule, initialBalanceCents))}` });
+    else if (rule.kind === 'profit_target') chips.push({ tone: 'goal', text: `목표 수익 +${formatBps(rule.targetBps)}` });
+    else if (rule.kind === 'min_trading_days') chips.push({ tone: 'goal', text: `최소 ${rule.days}일 거래` });
+    else if (rule.kind === 'min_profitable_days') chips.push({ tone: 'goal', text: `수익일 ${rule.days}일` });
+  }
+  return chips;
+}
+
 function allowanceCents(rule, initialBalanceCents) {
   if (rule.limitCents != null) return BigInt(rule.limitCents);
   return (BigInt(initialBalanceCents) * BigInt(rule.limitBps)) / BPS;
@@ -98,6 +121,13 @@ export function limitCards(phaseRules, results, initialBalanceCents) {
         title: describeRule(rule, initialBalanceCents).title,
         lineCents: result.thresholdCents,
         remainingCents: Number(remaining),
+        allowanceCents: Number(allowanceCents(rule, initialBalanceCents)),
+        // Share of the allowance still left, 0–100, for the gauge.
+        remainingPercent: (() => {
+          const allowance = allowanceCents(rule, initialBalanceCents);
+          if (allowance <= 0n || remaining <= 0n) return 0;
+          return Math.min(100, Number((remaining * 100n) / allowance));
+        })(),
         warning: warningFor(remaining, allowanceCents(rule, initialBalanceCents)),
         consequence: rule.kind === 'daily_loss' && rule.enforcement === 'pause' ? 'pause' : 'breach',
       };
@@ -163,6 +193,16 @@ export function stopLossPreview({ instrument, side, qty, entryPrice, stopLoss, d
   const loss = ceilDiv(move * q * mult, scale) + fee(entry) + fee(fill);
   const after = dailyRemainingCents == null ? null : BigInt(dailyRemainingCents) - loss;
   return { available: true, lossCents: Number(loss), remainingAfterCents: after == null ? null : Number(after), reachesLimit: after != null && after <= 0n };
+}
+
+// Notional value of an order in cents (price × quantity × multiplier), rounded up.
+export function orderNotional({ instrument, qty, price }) {
+  if (!instrument) return null;
+  const q = decimalToUnits(qty, instrument.qtyDecimals);
+  const p = decimalToUnits(price, instrument.priceDecimals);
+  if (!q || !p) return null;
+  const scale = 10n ** BigInt(instrument.priceDecimals + instrument.qtyDecimals);
+  return Number(ceilDiv(p * q * BigInt(instrument.multiplier ?? 1) * 100n, scale));
 }
 
 export function statusBanner(account) {

@@ -3,130 +3,180 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111b1a">
-  <title>트레이더 대시보드 | Oh My Prop</title>
-  <link rel="stylesheet" href="./src/journal.css">
+  <meta name="theme-color" content="#0d1412">
+  <title>트레이더 | Oh My Prop</title>
   <link rel="stylesheet" href="./src/trader/trader.css">
   <script type="module" src="./src/trader/app.js"></script>
 </head>
 <body>
-  <div class="sim-bar" role="note">시뮬레이션 계정 — 실제 시장에 주문이 전달되지 않습니다. 금액은 모두 가상 USD입니다.</div>
-  <div class="shell">
-    <header class="header">
-      <a class="brand" href="./index.html">P<span>.</span> <strong>OH MY PROP</strong></a>
-      <nav class="top-nav" aria-label="주요 메뉴">
-        <a href="./index.html">아카데미: 계산기</a>
-        <a href="./journal.html">아카데미: 연습장</a>
-        <span id="user-label" class="user-label"></span>
-        <button id="logout" class="secondary-button" type="button" hidden>로그아웃</button>
-      </nav>
-    </header>
+  <header class="topbar">
+    <a class="logo" href="./index.html"><span class="logo-mark">P</span> OH MY PROP</a>
+    <span class="sim-badge" title="실제 시장에 주문이 전달되지 않습니다">모의 거래 · 가상 USD</span>
+    <div class="topbar-right">
+      <a class="top-link" href="./index.html">개념 배우기</a>
+      <span id="user-label" class="user-label"></span>
+      <button id="logout" class="ghost-btn" type="button" hidden>로그아웃</button>
+    </div>
+  </header>
 
-    <main>
-      <section class="intro" aria-labelledby="title">
-        <p class="eyebrow">TRADER / 02</p>
-        <h1 id="title">트레이더 <em>대시보드</em></h1>
-        <p>규칙을 확인하고 시뮬레이션 계정을 열어 거래합니다. 한도까지 남은 금액은 서버의 규칙 판정과 같은 값으로 실시간 표시됩니다.</p>
-        <p id="page-status" class="storage-status" role="status" aria-live="polite">불러오는 중입니다.</p>
-      </section>
+  <p id="page-status" class="toast" role="status" aria-live="polite" hidden></p>
 
-      <section id="auth" class="card-section" aria-labelledby="auth-title" hidden>
-        <h2 id="auth-title">로그인</h2>
-        <form id="auth-form" class="auth-form" novalidate>
-          <label for="auth-email">이메일</label>
-          <input id="auth-email" type="email" autocomplete="username" inputmode="email" required>
-          <label for="auth-password">비밀번호</label>
-          <input id="auth-password" type="password" autocomplete="current-password" required aria-describedby="auth-help">
-          <p id="auth-help" class="help">비밀번호는 10~200자입니다. 다른 곳에서 쓰는 비밀번호를 재사용하지 마세요. 비밀번호 재설정 기능은 아직 없습니다.</p>
-          <div class="button-row">
-            <button id="auth-submit" class="primary-button" type="submit">로그인</button>
-            <button id="auth-toggle" class="secondary-button" type="button">계정 만들기로 전환</button>
-          </div>
-          <p id="auth-error" class="form-message" role="alert"></p>
-        </form>
-      </section>
+  <!-- Logged out: what this is, and how to start -->
+  <main id="welcome" class="welcome" hidden>
+    <section class="welcome-copy" aria-labelledby="welcome-title">
+      <p class="overline">PROP TRADING SIMULATOR</p>
+      <h1 id="welcome-title">가상 돈으로<br>트레이딩 규칙을 지키는 연습</h1>
+      <p class="lead">프랍 트레이딩 회사는 트레이더에게 "하루에 얼마 이상 잃지 말 것" 같은 규칙을 주고, 그 규칙을 지키며 수익을 내는지 평가합니다. 여기서는 그 평가를 <strong>가상 계좌로 그대로 체험</strong>할 수 있습니다.</p>
+      <ol class="how-steps">
+        <li><span>1</span><div><strong>상품 고르기</strong><p>무료 시즌 챌린지부터 시작하세요. 가상 잔고 $25,000가 주어집니다.</p></div></li>
+        <li><span>2</span><div><strong>규칙 확인 후 계정 열기</strong><p>하루 최대 손실·전체 최대 손실 같은 규칙을 읽고 동의합니다.</p></div></li>
+        <li><span>3</span><div><strong>사고팔며 한도 지키기</strong><p>화면이 "한도까지 얼마 남았는지"를 실시간으로 알려 줍니다. 한도에 닿으면 계정이 끝납니다.</p></div></li>
+      </ol>
+    </section>
+    <section class="auth-card" aria-labelledby="auth-title">
+      <h2 id="auth-title">로그인</h2>
+      <form id="auth-form" novalidate>
+        <label for="auth-email">이메일</label>
+        <input id="auth-email" type="email" autocomplete="username" inputmode="email" required>
+        <label for="auth-password">비밀번호</label>
+        <input id="auth-password" type="password" autocomplete="current-password" required aria-describedby="auth-help">
+        <p id="auth-help" class="field-help">10~200자. 다른 곳에서 쓰는 비밀번호는 쓰지 마세요.</p>
+        <button id="auth-submit" class="primary-btn" type="submit">로그인</button>
+        <button id="auth-toggle" class="link-btn" type="button">처음이신가요? 계정 만들기</button>
+        <p id="auth-error" class="form-error" role="alert"></p>
+      </form>
+    </section>
+  </main>
 
-      <section id="programs" class="card-section" aria-labelledby="programs-title" hidden>
-        <h2 id="programs-title">상품</h2>
-        <p class="help">계정을 열기 전에 규칙 전문을 확인하세요. 개설한 계정에는 확인한 규칙 버전이 끝까지 적용됩니다.</p>
-        <div id="program-list" class="program-list"></div>
-      </section>
-
-      <section id="accounts" class="card-section" aria-labelledby="accounts-title" hidden>
+  <!-- Logged in -->
+  <div id="app" class="app" hidden>
+    <aside class="sidebar" aria-labelledby="accounts-title">
+      <div class="sidebar-head">
         <h2 id="accounts-title">내 계정</h2>
-        <div id="account-list" class="account-list"></div>
+        <button id="new-account" class="ghost-btn small" type="button">+ 새 계정</button>
+      </div>
+      <div id="account-list" class="account-list"></div>
+    </aside>
+
+    <main class="main">
+      <!-- Product catalog -->
+      <section id="catalog" class="view" aria-labelledby="catalog-title" hidden>
+        <div class="view-head">
+          <p class="overline">STEP 1 · 상품 고르기</p>
+          <h1 id="catalog-title">어떤 평가에 도전할까요?</h1>
+          <p class="muted">처음이라면 <strong>무료 시즌 챌린지</strong>를 추천합니다. 계정을 열면 그때의 규칙이 끝까지 그대로 적용됩니다.</p>
+        </div>
+        <div id="program-list" class="program-grid"></div>
       </section>
 
-      <section id="dashboard" class="dashboard" aria-labelledby="dash-title" hidden>
+      <!-- Trading dashboard -->
+      <section id="dashboard" class="view" aria-labelledby="dash-title" hidden>
         <div class="dash-head">
           <div>
-            <p class="eyebrow" id="dash-meta"></p>
-            <h2 id="dash-title"></h2>
+            <p class="overline" id="dash-meta"></p>
+            <h1 id="dash-title"></h1>
           </div>
-          <p id="stream-status" class="stream-status" role="status" aria-live="polite"></p>
+          <div class="dash-head-right">
+            <span id="dash-status" class="status-pill"></span>
+            <span id="stream-status" class="live" role="status" aria-live="polite"></span>
+          </div>
         </div>
+
+        <div id="guide" class="guide" hidden>
+          <strong>처음 해 보시나요?</strong>
+          <ol>
+            <li><b>주문</b> 창에서 매수(오를 것 같을 때) 또는 매도(내릴 것 같을 때)를 고르세요.</li>
+            <li>수량을 고르고, 손실을 막을 <b>손절가</b>를 넣으면 "손절되면 얼마 잃는지"를 미리 보여 줍니다.</li>
+            <li>주문하면 아래 <b>한도까지 남은 돈</b>이 시세에 따라 실시간으로 움직입니다. 0이 되면 끝입니다.</li>
+          </ol>
+          <button id="guide-close" class="link-btn" type="button">알겠어요, 닫기</button>
+        </div>
+
         <p id="dash-banner" class="banner" role="status" aria-live="polite"></p>
 
-        <div class="summary" aria-label="계정 요약">
-          <div><span>잔고</span><strong id="sum-balance"></strong></div>
-          <div><span>에쿼티</span><strong id="sum-equity"></strong></div>
-          <div><span>평가손익</span><strong id="sum-unrealized"></strong></div>
-          <div><span>거래일</span><strong id="sum-days"></strong></div>
+        <div class="stats">
+          <div class="stat"><span class="stat-label">잔고</span><strong id="sum-balance"></strong><span class="stat-help">이미 확정된 돈</span></div>
+          <div class="stat"><span class="stat-label">에쿼티</span><strong id="sum-equity"></strong><span class="stat-help">지금 다 정리하면 남는 돈</span></div>
+          <div class="stat"><span class="stat-label">평가손익</span><strong id="sum-unrealized"></strong><span class="stat-help">아직 확정 안 된 손익</span></div>
+          <div class="stat"><span class="stat-label">거래한 날</span><strong id="sum-days"></strong><span class="stat-help">체결이 있었던 거래일</span></div>
         </div>
 
-        <h3 class="sub-title">손실 한도</h3>
-        <div id="limit-cards" class="limit-cards"></div>
-        <h3 class="sub-title">목표</h3>
-        <div id="objective-cards" class="objective-cards"></div>
+        <section class="panel" aria-labelledby="limits-title">
+          <div class="panel-head">
+            <h2 id="limits-title">한도까지 남은 돈</h2>
+            <p class="muted small">에쿼티가 한도선에 닿으면 규칙 위반입니다. 막대가 짧을수록 위험합니다.</p>
+          </div>
+          <div id="limit-cards" class="gauges"></div>
+        </section>
 
-        <div class="dash-grid">
-          <section class="panel-box" aria-labelledby="order-title">
-            <h3 id="order-title">주문</h3>
+        <div class="trade-grid">
+          <div class="trade-left">
+            <section class="panel" aria-labelledby="market-title">
+              <div class="panel-head"><h2 id="market-title">시세</h2><p class="muted small">모의 시세 · 실제 시세 아님</p></div>
+              <div id="market" class="market"></div>
+            </section>
+            <section class="panel" aria-labelledby="pos-title">
+              <div class="panel-head"><h2 id="pos-title">보유 포지션</h2></div>
+              <div id="positions"></div>
+              <h3 class="sub-head">대기 중인 주문</h3>
+              <div id="open-orders"></div>
+            </section>
+            <section class="panel" aria-labelledby="goal-title">
+              <div class="panel-head"><h2 id="goal-title">목표</h2></div>
+              <div id="objective-cards" class="goals"></div>
+            </section>
+          </div>
+
+          <section class="panel ticket" aria-labelledby="order-title">
+            <h2 id="order-title">주문</h2>
             <form id="order-form" novalidate>
               <label for="order-symbol">종목</label>
               <select id="order-symbol"></select>
-              <p id="order-quote" class="help"></p>
-              <fieldset class="side-toggle">
-                <legend>방향</legend>
-                <label><input type="radio" name="side" value="buy" checked> 매수</label>
-                <label><input type="radio" name="side" value="sell"> 매도</label>
+              <p id="order-quote" class="quote-line"></p>
+              <fieldset class="side-switch">
+                <legend class="visually-hidden">방향</legend>
+                <label class="side buy"><input type="radio" name="side" value="buy" checked><span>매수<small>오를 것 같을 때</small></span></label>
+                <label class="side sell"><input type="radio" name="side" value="sell"><span>매도<small>내릴 것 같을 때</small></span></label>
               </fieldset>
-              <label for="order-type">주문 유형</label>
+              <label for="order-type">주문 방식</label>
               <select id="order-type">
-                <option value="market">시장가</option>
-                <option value="limit">지정가</option>
-                <option value="stop">스톱</option>
+                <option value="market">시장가 — 지금 가격에 바로</option>
+                <option value="limit">지정가 — 원하는 가격에 닿으면</option>
+                <option value="stop">스톱 — 가격을 돌파하면</option>
               </select>
               <label for="order-qty">수량</label>
-              <input id="order-qty" inputmode="decimal" autocomplete="off" placeholder="예: 0.010">
+              <input id="order-qty" inputmode="decimal" autocomplete="off" placeholder="0.010">
+              <div id="qty-presets" class="presets" aria-label="수량 빠른 선택"></div>
+              <p id="order-notional" class="muted small"></p>
               <div id="order-price-wrap" hidden>
                 <label for="order-price">가격</label>
                 <input id="order-price" inputmode="decimal" autocomplete="off">
               </div>
-              <label for="order-sl">손절가 (선택)</label>
-              <input id="order-sl" inputmode="decimal" autocomplete="off">
-              <label for="order-tp">익절가 (선택)</label>
-              <input id="order-tp" inputmode="decimal" autocomplete="off">
+              <details class="protect" open>
+                <summary>손실 막기 (손절·익절)</summary>
+                <label for="order-sl">손절가 <span class="muted small">이 가격까지 불리해지면 자동 정리</span></label>
+                <input id="order-sl" inputmode="decimal" autocomplete="off">
+                <label for="order-tp">익절가 <span class="muted small">이 가격까지 유리해지면 자동 정리</span></label>
+                <input id="order-tp" inputmode="decimal" autocomplete="off">
+              </details>
               <p id="order-preview" class="preview" aria-live="polite"></p>
-              <button id="order-submit" class="primary-button" type="submit">주문 보내기</button>
-              <p id="order-message" class="form-message" role="alert"></p>
+              <button id="order-submit" class="primary-btn buy" type="submit">매수 주문</button>
+              <p id="order-message" class="form-error" role="alert"></p>
             </form>
-          </section>
-
-          <section class="panel-box" aria-labelledby="pos-title">
-            <h3 id="pos-title">포지션</h3>
-            <div id="positions"></div>
-            <h3 class="sub-title">미체결 주문</h3>
-            <div id="open-orders"></div>
-            <h3 class="sub-title">판정</h3>
-            <div id="verdicts"></div>
           </section>
         </div>
 
-        <section class="panel-box" aria-labelledby="log-title">
-          <h3 id="log-title">활동 기록</h3>
+        <details class="panel fold">
+          <summary>판정과 활동 기록</summary>
+          <h3 class="sub-head">판정</h3>
+          <div id="verdicts"></div>
+          <h3 class="sub-head">활동 기록</h3>
           <ol id="activity" class="activity" reversed></ol>
-        </section>
+        </details>
+        <details class="panel fold">
+          <summary>이 계정의 전체 규칙</summary>
+          <ul id="rule-detail" class="rule-list"></ul>
+        </details>
       </section>
     </main>
   </div>

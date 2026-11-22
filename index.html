@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1412">
+  <meta name="description" content="가상 잔고로 프랍 트레이딩 평가 규칙을 지키는 연습을 하는 시뮬레이션 서비스. 무료 시즌 챌린지 베타.">
+  <title>Oh My Prop — 규칙을 지키는 트레이딩 연습 (시뮬레이션)</title>
+  <link rel="stylesheet" href="./src/site/site.css">
+  <link rel="stylesheet" href="./src/site/nav.css">
+  <script type="module" src="./src/site/nav.js"></script>
+  <script type="module" src="./src/site/home.js"></script>
+</head>
+<body data-page="home">
+  <p class="sim-notice" role="note"><span aria-hidden="true">⚠</span> 시뮬레이션 계정 — 실제 시장에 주문이 전달되지 않습니다</p>
+  <div id="site-header"></div>
+
+  <main id="main" class="page">
+    <section class="hero" aria-labelledby="hero-title">
+      <div>
+        <p class="overline">Free season challenge · Beta</p>
+        <h1 id="hero-title">돈을 걸지 않고,<br>규칙을 지키는 트레이딩을 연습하세요</h1>
+        <p class="lead">프랍 트레이딩 평가는 "하루에 얼마 이상 잃지 말 것" 같은 손실 한도를 지키면서 거래하는지를 봅니다. Oh My Prop은 그 평가를 <strong>가상 잔고의 시뮬레이션 계정</strong>으로 체험하게 해 줍니다. 규칙은 공개된 명세 그대로 적용되고, 모든 판정에는 근거가 함께 표시됩니다.</p>
+        <div class="btn-row">
+          <a class="btn primary" href="/trader.html">무료 시즌 참가하기</a>
+          <a class="btn ghost" href="/academy/">아카데미에서 먼저 배우기</a>
+        </div>
+      </div>
+      <aside class="fact-card" aria-labelledby="facts-title">
+        <h2 id="facts-title">시작 전에 알아 두세요</h2>
+        <ul class="fact-list">
+          <li><span aria-hidden="true">✓</span><span>모든 계정은 시뮬레이션입니다. 잔고는 출금할 수 없는 가상 수치입니다.</span></li>
+          <li><span aria-hidden="true">✓</span><span>무료 시즌에는 현금·경품·포인트 등 어떤 금전적 보상도 없습니다. 순위 기록만 남습니다.</span></li>
+          <li><span aria-hidden="true">✓</span><span>종목·방향·시점을 추천하지 않습니다. 화면은 내가 정한 포지션이 규칙에 미치는 영향만 계산합니다.</span></li>
+          <li><span aria-hidden="true">✓</span><span>계정을 열 때 동의한 규칙 버전은 그 계정이 끝날 때까지 바뀌지 않습니다.</span></li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="section" aria-labelledby="how-title">
+      <p class="overline">How it works</p>
+      <h2 id="how-title">참가 방법</h2>
+      <ol class="steps">
+        <li><span>1</span><div><strong>규칙 읽기</strong><p>상품별 손실 한도와 목표를 규칙 설명 페이지에서 확인합니다.</p></div></li>
+        <li><span>2</span><div><strong>계정 열기</strong><p>트레이더 화면에서 가입 후, 규칙 버전에 동의하면 시즌 계정이 열립니다.</p></div></li>
+        <li><span>3</span><div><strong>한도 안에서 거래</strong><p>한도까지 남은 금액을 실시간으로 보며 거래합니다. 한도에 닿으면 계정이 종료됩니다.</p></div></li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="season-title">
+      <p class="overline">Current season</p>
+      <h2 id="season-title">지금 열린 무료 시즌</h2>
+      <p class="lead-sm">규칙을 지킨 계정만 순위표에 오릅니다. 순위는 익명 표시이며 보상은 없습니다.</p>
+      <div id="season-summary" aria-live="polite"><p class="status-msg" role="status">시즌 정보를 불러오는 중입니다…</p></div>
+    </section>
+
+    <section class="section" aria-labelledby="programs-title">
+      <p class="overline">Programs</p>
+      <h2 id="programs-title">상품 비교</h2>
+      <p class="lead-sm">각 상품의 규칙은 규칙 명세(JSON)에서 그대로 생성됩니다. 유료 평가는 법률 검토가 끝나기 전까지 열리지 않습니다.</p>
+      <div id="program-list" class="card-grid" aria-live="polite"><p class="status-msg" role="status">상품 정보를 불러오는 중입니다…</p></div>
+    </section>
+
+    <section class="section" aria-labelledby="principles-title">
+      <p class="overline">Transparency</p>
+      <h2 id="principles-title">운영 원칙</h2>
+      <div class="principles">
+        <article><h3>규칙은 버전으로 고정</h3><p>새 규칙 버전은 출시 14일 전에 공지하고, 이미 열린 계정에는 소급하지 않습니다. 규칙 페이지에서 버전 해시를 확인할 수 있습니다.</p></article>
+        <article><h3>판정 근거 공개</h3><p>위반·통과 판정마다 기준값, 관측값, 시각, 근거 이벤트를 보여 줍니다. 판정에 이의를 제기할 수 있습니다.</p></article>
+        <article><h3>사람이 검토하는 부정거래 심사</h3><p>자동 신호는 계정을 검토 대기열에 올릴 뿐이며, 제재는 담당자 검토 후에만 이뤄집니다.</p></article>
+        <article><h3>학습 도구는 무료</h3><p>아카데미의 손실 한도 계산기와 연습장은 로그인 없이 계속 무료로 쓸 수 있습니다.</p></article>
+      </div>
+      <p class="small muted section-foot">자세한 내용은 <a href="/legal/terms.html">이용약관(초안)</a>과 <a href="/legal/privacy.html">개인정보 처리방침(초안)</a>을 확인하세요.</p>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+</body>
+</html>

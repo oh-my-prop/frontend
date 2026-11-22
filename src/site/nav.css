@@ -17,8 +17,8 @@
 .omp-header a:focus-visible, .omp-footer a:focus-visible { outline: 2px solid var(--omp-accent); outline-offset: 2px; border-radius: 4px; }
 
 .omp-header { position: relative; z-index: 20; border-bottom: 1px solid var(--omp-line); }
-.omp-skip { position: absolute; left: 12px; top: -60px; padding: 8px 14px; border-radius: 8px; background: var(--omp-accent); color: #10200f !important; font-weight: 800; }
-.omp-skip:focus { top: 8px; }
+.omp-skip { position: absolute; left: 12px; top: 8px; z-index: 40; padding: 8px 14px; border-radius: 8px; background: var(--omp-accent); color: #10200f !important; font-weight: 800; }
+.omp-skip:not(:focus) { width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .omp-header-inner { max-width: 1120px; margin: 0 auto; padding: 10px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; }
 .omp-logo { display: flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 900; font-size: .85rem; letter-spacing: .1em; }
 .omp-logo-mark { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--omp-accent); color: #10200f; letter-spacing: 0; }

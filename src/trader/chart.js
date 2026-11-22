@@ -30,6 +30,8 @@ export function createCandleChart({ canvas, readout }) {
     warn: css('--warn', '#f2b84b'),
     info: css('--info', '#6cc3e0'),
     surface: css('--surface-2', '#1a2522'),
+    onColor: css('--surface', '#ffffff'),
+    onAccent: css('--on-brand', '#ffffff'),
   });
 
   const fmt = (value) => value.toFixed(data.decimals);
@@ -142,8 +144,8 @@ export function createCandleChart({ canvas, readout }) {
       ctx.setLineDash([]);
     }
     ctx.restore();
-    for (const [price, py, color] of tags) tag(String(price), py, color, '#0d1412', plot);
-    if (Number.isFinite(last)) tag(data.lastPrice, y(last), colors.accent, '#10200f', plot);
+    for (const [price, py, color] of tags) tag(String(price), py, color, colors.onColor, plot);
+    if (Number.isFinite(last)) tag(data.lastPrice, y(last), colors.accent, colors.onAccent, plot);
 
     // Crosshair.
     const index = hover ? layout.indexAt(hover.x) : -1;

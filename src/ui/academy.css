@@ -1,0 +1,53 @@
+/* Academy (0.2 learning tools) on the design tokens.
+ *
+ * src/style.css and src/journal.css predate the design system and hard-code a
+ * light palette. Rather than rewrite them, this layer (loaded after them) maps
+ * their surfaces, text, fields and buttons onto tokens.css, so the academy
+ * matches the rest of the product in light and dark themes. Layout is untouched.
+ */
+
+:root { background: var(--bg) !important; color: var(--text) !important; font-family: var(--font) !important; }
+body { background: var(--bg); color: var(--text); }
+
+/* Page chrome from the old header/footer (the shared nav replaces the header). */
+.site-header, .header { background: transparent !important; border-color: var(--line) !important; }
+footer { border-color: var(--line) !important; color: var(--muted) !important; }
+.footer-brand, .brand { color: var(--text) !important; }
+.brand span, .footer-brand span, .brand-mark span { color: var(--brand) !important; }
+.brand-mark { background: var(--brand) !important; color: var(--on-brand) !important; }
+
+/* Type */
+h1, h2, h3, h4, h5, .hero h1, .group-title, .result-card h3, .reset-card h4 { color: var(--text); }
+.hero h1 em, h1 em { color: var(--brand) !important; }
+.eyebrow, .kicker, .header-tag, .card-heading, .explanation-grid article > span, .eyebrow span, .event-status { color: var(--brand) !important; }
+.hero-description, .hero-note, .section-heading p, .explanation-intro > p:last-child, .explanation-grid p, .field-help, .help,
+.reset-intro > p:not(.kicker), .reset-output > p, .reset-equity, .metric, .result-footnote, .intro > p:not(.eyebrow), .summary-grid span,
+.sync-status, .label-sub, .step-number, .card-index, .group-title small, .group-title > span { color: var(--muted) !important; }
+.metric strong, .reset-equity strong, .hero-note strong, .disclaimer strong { color: var(--text) !important; }
+
+/* Surfaces */
+.workspace, .reset-workspace, .result-card, .reset-card, .backup, .conflict, .input-panel { background: var(--surface) !important; border-color: var(--line) !important; box-shadow: var(--shadow-1) !important; }
+.result-panel, .reset-output, .panel + .panel, .summary-grid > div, .conflict-preview { background: var(--surface-2) !important; border-color: var(--line) !important; }
+.input-panel, .reset-form { border-color: var(--line) !important; }
+.field-group, .metric.remaining, .reset-rule, .explanation-grid, .explanation-grid article + article, .list-heading, .trade-list li, .divider, .summary-grid { border-color: var(--line) !important; }
+.divider, .summary-grid { background: var(--line) !important; }
+.notice, .storage-status, .sync-account, .reset-caveat, .disclaimer, .explanation-grid article div, .card-icon, .note-icon, .reset-status, .status-pill {
+  background: var(--brand-soft) !important; color: var(--text-2) !important; border-color: var(--brand) !important;
+}
+.primary-result { background: var(--surface-sunken) !important; color: var(--text) !important; border: 1px solid var(--line); }
+.primary-top > span:first-child, .primary-caption, .primary-bottom { color: var(--muted) !important; border-color: var(--line) !important; }
+.at-boundary { background: var(--sell-bg) !important; }
+.at-boundary .status-pill, .reset-status.below-limit, .intro .storage-status.warning, .error, .form-error { background: var(--sell-bg) !important; color: var(--sell-text) !important; }
+.breached, .event-breach, .backup-status { color: var(--sell-text) !important; }
+.pending, input.draft { background: var(--warn-bg) !important; border-color: var(--warn) !important; color: var(--text) !important; }
+
+/* Fields and buttons */
+input, .input-wrap { background: var(--surface) !important; border-color: var(--line) !important; color: var(--text) !important; }
+.input-wrap input { background: transparent !important; color: var(--text) !important; }
+.input-wrap:focus-within, input:focus { border-color: var(--brand) !important; box-shadow: 0 0 0 3px var(--brand-soft) !important; outline: none; }
+input::placeholder { color: var(--faint) !important; }
+.primary-button { background: var(--brand) !important; border-color: var(--brand) !important; color: var(--on-brand) !important; }
+.primary-button:hover { background: var(--brand-strong) !important; }
+.secondary-button, .remove-button { background: var(--surface) !important; border-color: var(--line) !important; color: var(--text-2) !important; }
+.secondary-button:hover, .remove-button:hover { border-color: var(--line-strong) !important; color: var(--text) !important; }
+a:focus-visible, button:focus-visible, input:focus-visible { outline-color: var(--brand) !important; }

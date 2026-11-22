@@ -4,6 +4,7 @@
 // swaps the placeholders for real markup. The link lists are plain data so the
 // link test can check every target exists.
 
+import { mountThemeToggle } from '../ui/theme.js';
 import { el } from './dom.js';
 
 export const NAV_LINKS = [
@@ -35,10 +36,12 @@ export function buildHeader(current) {
   return el('header', { class: 'omp-header' },
     el('a', { class: 'omp-skip', href: '#main', text: '본문으로 건너뛰기' }),
     el('div', { class: 'omp-header-inner' },
-      el('a', { class: 'omp-logo', href: '/' }, el('span', { class: 'omp-logo-mark', 'aria-hidden': 'true', text: 'P' }), el('span', { text: 'OH MY PROP' })),
+      el('a', { class: 'omp-logo', href: '/' }, el('img', { class: 'brand-mark', src: '/assets/logo.svg', alt: '', width: '28', height: '28' }), el('span', { text: 'Oh My Prop' })),
       el('nav', { class: 'omp-nav', 'aria-label': '사이트 메뉴' },
         el('ul', { class: 'omp-nav-list' }, NAV_LINKS.map((link) => navItem(link, current)))),
-      el('a', { class: 'omp-cta', href: CTA_LINK.href, text: CTA_LINK.text }),
+      el('div', { class: 'omp-actions' },
+        el('span', { class: 'omp-theme', 'data-theme-slot': '' }),
+        el('a', { class: 'omp-cta', href: CTA_LINK.href, text: CTA_LINK.text })),
     ),
   );
 }
@@ -57,7 +60,9 @@ export function buildFooter(current) {
 
 export function renderSiteChrome(doc = document) {
   const current = doc.body?.dataset.page ?? '';
-  doc.getElementById('site-header')?.replaceWith(buildHeader(current));
+  const header = buildHeader(current);
+  doc.getElementById('site-header')?.replaceWith(header);
+  mountThemeToggle(header.querySelector('[data-theme-slot]'));
   doc.getElementById('site-footer')?.replaceWith(buildFooter(current));
 }
 

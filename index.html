@@ -6,6 +6,9 @@
   <meta name="theme-color" content="#0d1412">
   <meta name="description" content="가상 잔고로 프랍 트레이딩 평가 규칙을 지키는 연습을 하는 시뮬레이션 서비스. 무료 시즌 챌린지 베타.">
   <title>Oh My Prop — 규칙을 지키는 트레이딩 연습 (시뮬레이션)</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script src="./src/ui/theme-init.js"></script>
+  <link rel="stylesheet" href="./src/ui/tokens.css">
   <link rel="stylesheet" href="./src/site/site.css">
   <link rel="stylesheet" href="./src/site/nav.css">
   <script type="module" src="./src/site/nav.js"></script>
@@ -26,7 +29,9 @@
           <a class="btn ghost" href="/academy/">아카데미에서 먼저 배우기</a>
         </div>
       </div>
-      <aside class="fact-card" aria-labelledby="facts-title">
+      <aside aria-labelledby="facts-title">
+      <img class="hero-art" src="/assets/limit-line.svg" alt="가격선이 움직이는 동안 손실 한도선은 고정되어 있는 그림" width="480" height="220">
+      <div class="fact-card">
         <h2 id="facts-title">시작 전에 알아 두세요</h2>
         <ul class="fact-list">
           <li><span aria-hidden="true">✓</span><span>모든 계정은 시뮬레이션입니다. 잔고는 출금할 수 없는 가상 수치입니다.</span></li>
@@ -34,6 +39,7 @@
           <li><span aria-hidden="true">✓</span><span>종목·방향·시점을 추천하지 않습니다. 화면은 내가 정한 포지션이 규칙에 미치는 영향만 계산합니다.</span></li>
           <li><span aria-hidden="true">✓</span><span>계정을 열 때 동의한 규칙 버전은 그 계정이 끝날 때까지 바뀌지 않습니다.</span></li>
         </ul>
+      </div>
       </aside>
     </section>
 

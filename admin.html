@@ -5,17 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <title>운영 콘솔 | Oh My Prop</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script src="./src/ui/theme-init.js"></script>
+  <link rel="stylesheet" href="./src/ui/tokens.css">
   <link rel="stylesheet" href="./src/trader/trader.css">
   <link rel="stylesheet" href="./src/admin/admin.css">
   <script type="module" src="./src/admin/admin.js"></script>
 </head>
 <body>
   <header class="topbar">
-    <a class="logo" href="/trader.html"><span class="logo-mark">P</span> OH MY PROP</a>
+    <a class="logo" href="/"><img class="brand-mark" src="/assets/logo.svg" alt="" width="28" height="28"><span class="logo-word">Oh My Prop<small>Prop evaluation simulator</small></span></a>
     <span class="sim-badge ops-badge">운영 콘솔 · 열람 기록됨</span>
     <div class="topbar-right">
       <span id="staff-label" class="user-label"></span>
       <a class="top-link" href="/trader.html">트레이더 화면</a>
+      <span id="theme-slot"></span>
     </div>
   </header>
 

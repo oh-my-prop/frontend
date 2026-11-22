@@ -4,6 +4,7 @@
 
 import { describeEvent } from '../trader/view.js';
 import { formatCents, formatTimestamp } from '../trader/format.js';
+import { mountThemeToggle } from '../ui/theme.js';
 
 const $ = (id) => document.getElementById(id);
 const STATUS_TEXT = { active: '진행 중', passed: '통과', breached: '위반 종료', expired: '기간 만료', withdrawn: '철회', open: '대기', upheld: '유지', overturned: '번복' };
@@ -243,6 +244,7 @@ async function loadAudit() {
 // ---- boot ---------------------------------------------------------------------------
 
 async function boot() {
+  mountThemeToggle($('theme-slot'));
   const me = await call('GET', '/api/v2/admin/me');
   if (!me.ok) {
     $('locked').hidden = false;

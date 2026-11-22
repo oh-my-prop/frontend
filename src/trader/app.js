@@ -3,6 +3,7 @@
 
 import * as api from './api.js';
 import { createCandleChart } from './chart.js';
+import { mountThemeToggle } from '../ui/theme.js';
 import { mergeCandles, midText } from './chart-scale.js';
 import { formatCents, formatSignedCents, formatTimestamp } from './format.js';
 import {
@@ -25,6 +26,7 @@ const state = {
   current: null, // { account, spec, phase, events }
   quotes: new Map(),
   previousBid: new Map(), // symbol -> bid before the latest quote, for the up/down tick
+  flash: new Map(), // symbol -> { dir: 1 | -1, until: ms } — tint a moved price briefly
   closeStream: null,
   quoteTimer: null,
   pendingOrder: null, // { key, body } kept when a send failed to reach the server
@@ -369,7 +371,10 @@ async function refreshQuotes() {
   if (!result.ok) return;
   for (const quote of result.quotes) {
     const previous = state.quotes.get(quote.symbol);
-    if (previous?.bid && previous.bid !== quote.bid) state.previousBid.set(quote.symbol, previous.bid);
+    if (previous?.bid && previous.bid !== quote.bid) {
+      state.previousBid.set(quote.symbol, previous.bid);
+      state.flash.set(quote.symbol, { dir: Math.sign(Number(quote.bid) - Number(previous.bid)), until: Date.now() + 600 });
+    }
     state.quotes.set(quote.symbol, quote);
   }
   renderMarket();
@@ -522,6 +527,12 @@ function renderGoals() {
   }));
 }
 
+function flashClass(symbol) {
+  const flash = state.flash.get(symbol);
+  if (!flash || Date.now() > flash.until) return '';
+  return flash.dir > 0 ? ' flash-up' : flash.dir < 0 ? ' flash-down' : '';
+}
+
 function renderMarket() {
   if (!state.current) return;
   $('market').replaceChildren(...state.current.spec.instruments.map((instrument) => {
@@ -543,7 +554,7 @@ function renderMarket() {
       },
     },
     el('span', { class: 'ticker-symbol', text: instrument.symbol }),
-    el('strong', { class: 'ticker-price', text: ok ? `${direction > 0 ? '▲ ' : direction < 0 ? '▼ ' : ''}${quote.bid}` : '시세 없음' }),
+    el('strong', { class: `ticker-price${flashClass(instrument.symbol)}`, text: ok ? `${direction > 0 ? '▲ ' : direction < 0 ? '▼ ' : ''}${quote.bid}` : quote?.stale ? '시세 지연' : '시세 없음' }),
     el('span', { class: 'muted small', text: ok ? `팔 때 ${quote.bid} · 살 때 ${quote.ask}` : '주문할 수 없습니다' }),
     );
   }));
@@ -805,6 +816,8 @@ async function closePosition(symbol, button) {
 // ---- boot ------------------------------------------------------------------------
 
 async function boot() {
+  mountThemeToggle($('theme-slot'));
+  globalThis.addEventListener('omp:themechange', () => renderChart());
   $('auth-form').addEventListener('submit', submitAuth);
   $('auth-toggle').addEventListener('click', () => {
     state.registerMode = !state.registerMode;

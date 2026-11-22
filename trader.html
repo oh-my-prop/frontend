@@ -5,18 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0d1412">
   <title>트레이더 | Oh My Prop</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script src="./src/ui/theme-init.js"></script>
+  <link rel="stylesheet" href="./src/ui/tokens.css">
   <link rel="stylesheet" href="./src/trader/trader.css">
   <script type="module" src="./src/trader/app.js"></script>
 </head>
 <body>
   <header class="topbar">
-    <a class="logo" href="./index.html"><span class="logo-mark">P</span> OH MY PROP</a>
+    <a class="logo" href="/"><img class="brand-mark" src="/assets/logo.svg" alt="" width="28" height="28"><span class="logo-word">Oh My Prop<small>Prop evaluation simulator</small></span></a>
     <span class="sim-badge" title="실제 시장에 주문이 전달되지 않습니다">모의 거래 · 가상 USD</span>
     <div class="topbar-right">
       <a class="top-link" href="./academy/index.html">개념 배우기</a>
       <a id="admin-link" class="top-link" href="/admin.html" hidden>운영 콘솔</a>
       <button id="security-open" class="ghost-btn" type="button" hidden>보안</button>
       <span id="user-label" class="user-label"></span>
+      <span id="theme-slot"></span>
       <button id="logout" class="ghost-btn" type="button" hidden>로그아웃</button>
     </div>
   </header>

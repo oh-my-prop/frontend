@@ -85,7 +85,10 @@ test('pages follow the CSP: file-based module scripts, no inline script/style/ha
   for (const file of htmlFiles) {
     const html = read(file);
     for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
-      if (!/\bsrc=/.test(match[1]) || !/type=["']module["']/.test(match[1])) problems.push(`${file}: script without src/type=module`);
+      // The one classic script is src/ui/theme-init.js: it has to run before first
+      // paint (module scripts are deferred) so the saved theme never flashes.
+      const themeInit = /src=["'][^"']*src\/ui\/theme-init\.js["']/.test(match[1]);
+      if (!/\bsrc=/.test(match[1]) || (!/type=["']module["']/.test(match[1]) && !themeInit)) problems.push(`${file}: script without src/type=module`);
       if (match[2].trim()) problems.push(`${file}: inline script body`);
     }
     if (/<style\b/i.test(html)) problems.push(`${file}: <style> element`);

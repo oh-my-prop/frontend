@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 220" role="img" aria-label="가격선이 손실 한도선 위에서 움직이는 모습">
+  <!-- Brand illustration: equity moves, the dashed limit line does not. Animated
+       with SMIL (no CSS) so it runs under the site's style CSP. Neutral colors
+       work on light and dark backgrounds. -->
+  <defs>
+    <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6366f1" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#6366f1" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <g stroke="#94a3b8" stroke-opacity=".18" stroke-width="1">
+    <path d="M0 40H480M0 90H480M0 140H480"/>
+  </g>
+  <path d="M10 120 L60 98 L100 112 L150 74 L190 92 L240 60 L280 84 L320 70 L360 104 L400 88 L440 58 L470 66 L470 220 L10 220 Z" fill="url(#fill)">
+    <animate attributeName="opacity" from="0" to="1" dur="1.4s" begin=".3s" fill="freeze"/>
+  </path>
+  <path d="M10 120 L60 98 L100 112 L150 74 L190 92 L240 60 L280 84 L320 70 L360 104 L400 88 L440 58 L470 66"
+        fill="none" stroke="#6366f1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+        stroke-dasharray="620" stroke-dashoffset="620">
+    <animate attributeName="stroke-dashoffset" from="620" to="0" dur="1.6s" fill="freeze" calcMode="spline" keySplines=".2 .8 .2 1" keyTimes="0;1"/>
+  </path>
+  <circle cx="470" cy="66" r="0" fill="#6366f1">
+    <animate attributeName="r" from="0" to="5" dur=".3s" begin="1.6s" fill="freeze"/>
+  </circle>
+  <circle cx="470" cy="66" r="5" fill="none" stroke="#6366f1" opacity="0">
+    <animate attributeName="r" values="5;14" dur="1.8s" begin="1.9s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values=".6;0" dur="1.8s" begin="1.9s" repeatCount="indefinite"/>
+  </circle>
+  <path d="M10 176H470" stroke="#ef4444" stroke-width="2" stroke-dasharray="7 7" stroke-linecap="round"/>
+  <text x="14" y="199" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="#ef4444">최대 손실 한도선</text>
+  <text x="466" y="199" text-anchor="end" font-family="system-ui, sans-serif" font-size="13" fill="#94a3b8">여유 $2,500</text>
+</svg>

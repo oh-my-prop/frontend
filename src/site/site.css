@@ -165,3 +165,4 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   .sim-notice { font-size: .8rem; }
 }
 .section-foot { margin-top: 16px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

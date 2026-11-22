@@ -4,26 +4,24 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#111b1a">
-  <title>손실 한도 시뮬레이터 | Oh My Prop</title>
-  <link rel="stylesheet" href="./src/style.css">
-  <script type="module" src="./src/app.js"></script>
-  <script type="module" src="./src/reset-ui.js"></script>
+  <title>아카데미 — 손실 한도 시뮬레이터 | Oh My Prop</title>
+  <link rel="stylesheet" href="../src/style.css">
+  <link rel="stylesheet" href="../src/site/nav.css">
+  <script type="module" src="../src/site/nav.js"></script>
+  <script type="module" src="../src/app.js"></script>
+  <script type="module" src="../src/reset-ui.js"></script>
 </head>
-<body>
+<body data-page="academy">
+  <div id="site-header"></div>
   <div class="page-shell">
-    <header class="site-header">
-      <a class="brand" href="./" aria-label="Oh My Prop 홈"><span class="brand-mark" aria-hidden="true">P<span>.</span></span><span>OH MY PROP <small>프랍 트레이딩 연습</small></span></a>
-      <span class="header-tag"><span aria-hidden="true"></span> EDUCATIONAL TOOL</span>
-    </header>
-
-    <main>
+    <main id="main">
       <section class="hero" aria-labelledby="page-title">
         <div class="hero-copy">
           <p class="eyebrow"><span>01</span> &nbsp; / &nbsp; TRADING RISK SIMULATOR</p>
           <h1 id="page-title">손실 한도,<br><em>숫자로 먼저</em> 확인하세요.</h1>
           <p class="hero-description">가상의 계좌와 고정 손실 규칙으로 여유 금액을 살펴보세요. 거래를 시작하기 전, 리스크를 이해하기 위한 연습 도구입니다.</p>
           <p><a href="./journal.html">가상 거래 연습장 열기 →</a></p>
-          <p><a href="./trader.html">트레이더 대시보드 열기 →</a></p>
+          <p><a href="../trader.html">트레이더 대시보드 열기 →</a></p>
         </div>
         <div class="hero-note"><span class="note-icon" aria-hidden="true">✳</span><p><strong>연습을 위한 시뮬레이션</strong><br>실제 거래나 규정 준수 판정이 아닙니다.</p></div>
       </section>
@@ -94,7 +92,7 @@
       <section class="explanation" aria-labelledby="explanation-title"><div class="explanation-intro"><p class="kicker">THE METHODOLOGY</p><h2 id="explanation-title">어떻게 계산하나요?</h2><p>실제 평가 규정이 아닌, 학습을 위한 단순한 가정입니다.</p></div><div class="explanation-grid"><article><span>01 / DAILY</span><h3>일일 손실 한도</h3><p>일일 시작 자산에서 초기 잔고에 일일 손실률을 곱한 금액을 뺍니다.</p><div>일일 시작 자산 − (초기 잔고 × 일일 손실률)</div></article><article><span>02 / MAXIMUM</span><h3>최대 손실 한도</h3><p>초기 잔고에서 초기 잔고에 최대 손실률을 곱한 금액을 뺍니다.</p><div>초기 잔고 − (초기 잔고 × 최대 손실률)</div></article><article><span>03 / IMPORTANT</span><h3>직접 확인해야 할 것</h3><p>두 한도 모두 초기 잔고를 고정 기준으로 사용합니다. 소수 센트가 발생하면 한도를 위쪽 센트로 올림합니다.</p><p>자동 갱신이나 일일 리셋 계산은 제공하지 않습니다. 현재 자산과 일일 시작 자산이 최신인지 직접 확인하세요.</p></article></div></section>
       <aside class="disclaimer"><span aria-hidden="true">ⓘ</span><p><strong>알아두세요.</strong> 이 도구는 교육용이며 특정 업체의 규정, 실제 거래 결과 또는 규정 준수를 판정하지 않습니다. 실제 조건은 업체와 계좌의 최신 규정을 직접 확인하세요. 입력값은 이 화면에서만 사용되며 저장되지 않습니다.</p></aside>
     </main>
-    <footer><span class="footer-brand">P<span>.</span> &nbsp; OH MY PROP</span><span>LEARN THE RISK. BEFORE THE TRADE.</span><span>교육용 시뮬레이터</span></footer>
   </div>
+  <div id="site-footer"></div>
 </body>
 </html>

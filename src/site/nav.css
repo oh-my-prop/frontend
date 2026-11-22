@@ -1,0 +1,47 @@
+/* Shared header/footer rendered by src/site/nav.js. Self-contained colors so it
+   also sits on the light academy pages without inheriting their styles. */
+
+.omp-header, .omp-footer {
+  --omp-bg: #0d1412;
+  --omp-surface: #141d1a;
+  --omp-line: #24332e;
+  --omp-text: #e8f0eb;
+  --omp-muted: #8ea39a;
+  --omp-accent: #b8ed78;
+  font-family: 'Pretendard', 'Noto Sans KR', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  line-height: 1.5;
+  color: var(--omp-text);
+  background: var(--omp-bg);
+}
+.omp-header a, .omp-footer a { color: inherit; text-decoration: none; }
+.omp-header a:focus-visible, .omp-footer a:focus-visible { outline: 2px solid var(--omp-accent); outline-offset: 2px; border-radius: 4px; }
+
+.omp-header { position: relative; z-index: 20; border-bottom: 1px solid var(--omp-line); }
+.omp-skip { position: absolute; left: 12px; top: -60px; padding: 8px 14px; border-radius: 8px; background: var(--omp-accent); color: #10200f !important; font-weight: 800; }
+.omp-skip:focus { top: 8px; }
+.omp-header-inner { max-width: 1120px; margin: 0 auto; padding: 10px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; }
+.omp-logo { display: flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 900; font-size: .85rem; letter-spacing: .1em; }
+.omp-logo-mark { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--omp-accent); color: #10200f; letter-spacing: 0; }
+.omp-nav { flex: 1 1 auto; min-width: 0; }
+.omp-nav-list, .omp-footer-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 2px 4px; }
+.omp-nav-link { display: inline-flex; align-items: center; min-height: 40px; padding: 6px 10px; border-radius: 8px; color: var(--omp-muted) !important; font-size: .9rem; font-weight: 600; border-bottom: 2px solid transparent; }
+.omp-nav-link:hover { color: var(--omp-text) !important; background: var(--omp-surface); }
+/* Current page: bold + underline, not color alone. */
+.omp-nav-link[aria-current="page"] { color: var(--omp-text) !important; font-weight: 800; border-bottom-color: var(--omp-accent); border-radius: 8px 8px 0 0; }
+.omp-cta { display: inline-flex; align-items: center; min-height: 40px; padding: 8px 14px; border-radius: 10px; background: var(--omp-accent); color: #10200f !important; font-weight: 800; font-size: .88rem; white-space: nowrap; }
+
+.omp-footer { display: block; margin-top: 64px; padding: 0; border-top: 1px solid var(--omp-line); font-size: .85rem; font-weight: 400; letter-spacing: normal; }
+.omp-footer-inner { max-width: 1120px; margin: 0 auto; padding: 28px 24px 36px; display: grid; gap: 10px; }
+.omp-footer p { margin: 0; }
+.omp-footer-brand { font-weight: 800; letter-spacing: .08em; }
+.omp-footer-notice, .omp-footer-legal { color: var(--omp-muted); }
+.omp-footer-list .omp-nav-link { min-height: 36px; padding: 4px 8px 4px 0; font-size: .85rem; }
+.omp-footer-list .omp-nav-link[aria-current="page"] { padding-left: 0; }
+
+@media (max-width: 640px) {
+  .omp-header-inner { padding: 8px 16px; }
+  .omp-nav { order: 3; flex-basis: 100%; }
+  .omp-cta { margin-left: auto; }
+  .omp-nav-link { padding: 6px 8px; font-size: .85rem; }
+  .omp-footer-inner { padding: 24px 16px 32px; }
+}

@@ -9,6 +9,7 @@ import {
   describeEvent, describeRule, limitCards, objectiveCards, orderNotional, phaseLabel,
   programName, programPitch, ruleHighlights, statusBanner, stopLossPreview,
 } from './view.js';
+import { adverseVerdict, appealReasonOk, appealStatus, groupSecret, verdictFacts } from './ops-view.js';
 
 const $ = (id) => document.getElementById(id);
 const QUOTE_POLL_MS = 2000;
@@ -27,6 +28,8 @@ const state = {
   closeStream: null,
   quoteTimer: null,
   pendingOrder: null, // { key, body } kept when a send failed to reach the server
+  mfaChallenge: null, // set after a correct password when two-factor is on
+  appeals: [],
   chart: null,
   candles: { symbol: null, list: [], loading: null },
   rendered: { positions: null, orders: null, activity: null },
@@ -65,6 +68,12 @@ function renderShell() {
   $('app').hidden = !signedIn;
   $('logout').hidden = !signedIn;
   $('user-label').textContent = signedIn ? state.user.email : '';
+  $('security-open').hidden = !signedIn;
+  $('admin-link').hidden = !(signedIn && state.user.role);
+  $('mfa-step').hidden = !state.mfaChallenge;
+  $('auth-email').disabled = Boolean(state.mfaChallenge);
+  $('auth-password').disabled = Boolean(state.mfaChallenge);
+  $('auth-toggle').hidden = Boolean(state.mfaChallenge);
   $('auth-title').textContent = state.registerMode ? '계정 만들기' : '로그인';
   $('auth-submit').textContent = state.registerMode ? '계정 만들기' : '로그인';
   $('auth-toggle').textContent = state.registerMode ? '이미 계정이 있어요. 로그인' : '처음이신가요? 계정 만들기';
@@ -73,6 +82,7 @@ function renderShell() {
 
 async function submitAuth(event) {
   event.preventDefault();
+  if (state.mfaChallenge) return submitCode();
   const email = $('auth-email').value.trim();
   const password = $('auth-password').value;
   const result = state.registerMode ? await api.register(email, password) : await api.login(email, password);
@@ -81,17 +91,100 @@ async function submitAuth(event) {
     return;
   }
   $('auth-error').textContent = '';
+  if (result.mfaRequired) {
+    state.mfaChallenge = result.challenge;
+    renderShell();
+    $('auth-code').focus();
+    return;
+  }
   $('auth-password').value = '';
   state.user = result.user;
+  if (!state.user.mfa) state.user = (await api.getMe()).user ?? state.user;
   renderShell();
   await loadWorkspace();
+}
+
+async function submitCode() {
+  const result = await api.loginTotp(state.mfaChallenge, $('auth-code').value.trim());
+  if (!result.ok) {
+    $('auth-error').textContent = result.attemptsLeft !== undefined ? `${result.message} (남은 시도 ${result.attemptsLeft}회)` : result.message;
+    if (result.restart) {
+      state.mfaChallenge = null;
+      $('auth-code').value = '';
+      renderShell();
+    }
+    return;
+  }
+  state.mfaChallenge = null;
+  $('auth-error').textContent = '';
+  $('auth-password').value = '';
+  $('auth-code').value = '';
+  state.user = (await api.getMe()).user ?? result.user;
+  renderShell();
+  await loadWorkspace();
+}
+
+// ---- security (two-factor) -----------------------------------------------------------
+
+function showSecurity() {
+  closeDashboard();
+  $('catalog').hidden = true;
+  $('security').hidden = false;
+  renderSecurity();
+}
+
+function renderSecurity(setup = null) {
+  const mfa = state.user?.mfa ?? { enabled: false };
+  $('mfa-status').textContent = mfa.enabled ? '켜짐 — 로그인할 때 인증 앱 코드를 묻습니다.' : '꺼짐 — 비밀번호만으로 로그인합니다.';
+  $('mfa-status').dataset.on = String(Boolean(mfa.enabled));
+  $('mfa-setup').hidden = !setup;
+  if (setup) {
+    $('mfa-secret').textContent = groupSecret(setup.secret);
+    $('mfa-uri').textContent = setup.otpauthUri;
+  }
+  $('mfa-start').hidden = mfa.enabled || Boolean(setup);
+  $('mfa-enable').hidden = mfa.enabled || !setup;
+  $('mfa-disable').hidden = !mfa.enabled;
+  $('mfa-code-label').hidden = !(setup || mfa.enabled);
+  $('mfa-code').hidden = !(setup || mfa.enabled);
+  $('mfa-code-label').textContent = mfa.enabled ? '끄려면 현재 6자리 코드를 입력하세요' : '앱에 나온 6자리 코드';
+  $('mfa-error').textContent = '';
+}
+
+async function startMfa() {
+  const result = await api.totpSetup();
+  if (!result.ok) return void ($('mfa-error').textContent = result.message);
+  renderSecurity(result);
+  $('mfa-code').focus();
+}
+
+async function submitMfa(event) {
+  event.preventDefault();
+  const code = $('mfa-code').value.trim();
+  const result = await api.totpEnable(code);
+  if (!result.ok) return void ($('mfa-error').textContent = result.message);
+  state.user = { ...state.user, mfa: result.mfa };
+  $('mfa-code').value = '';
+  renderSecurity();
+  toast('2단계 인증을 켰습니다. 다음 로그인부터 코드를 묻습니다.');
+}
+
+async function disableMfa() {
+  const result = await api.totpDisable($('mfa-code').value.trim());
+  if (!result.ok) return void ($('mfa-error').textContent = result.message);
+  state.user = { ...state.user, mfa: result.mfa };
+  $('mfa-code').value = '';
+  renderSecurity();
+  toast('2단계 인증을 껐습니다.', 'warning');
 }
 
 async function doLogout() {
   await api.logout();
   closeDashboard();
   state.user = null;
+  state.mfaChallenge = null;
   state.accounts = [];
+  $('security').hidden = true;
   renderShell();
   toast('로그아웃했습니다.');
 }
@@ -118,6 +211,7 @@ async function loadWorkspace() {
 
 function showCatalog() {
   closeDashboard();
+  $('security').hidden = true;
   $('catalog').hidden = false;
   renderAccounts();
 }
@@ -212,6 +306,8 @@ function closeDashboard() {
   state.pendingOrder = null;
   state.rendered = { positions: null, orders: null, activity: null };
   $('dashboard').hidden = true;
+  $('verdict-card').hidden = true;
+  state.appeals = [];
 }
 
 async function selectAccount(id) {
@@ -223,7 +319,9 @@ async function selectAccount(id) {
   const phase = entry.spec.phases.find((item) => item.id === account.phase);
   state.current = { account, spec: entry.spec, phase, events: events.ok ? events.events : [] };
   $('catalog').hidden = true;
+  $('security').hidden = true;
   $('dashboard').hidden = false;
+  loadAppeals(id);
   renderInstruments();
   renderRuleDetail();
   renderDashboard();
@@ -504,10 +602,54 @@ function renderOrders() {
   )));
 }
 
+// ---- verdict card and appeals -------------------------------------------------------
+
+async function loadAppeals(id) {
+  const result = await api.getAppeals(id);
+  if (state.current?.account.id !== id) return;
+  state.appeals = result.ok ? result.appeals : [];
+  renderVerdictCard();
+}
+
+function renderVerdictCard() {
+  if (!state.current) return;
+  const verdict = adverseVerdict(state.current.events);
+  const card = $('verdict-card');
+  card.hidden = !verdict;
+  if (!verdict) return;
+  const { title, facts } = verdictFacts(verdict, state.current.phase?.rules ?? []);
+  $('verdict-title').textContent = title;
+  $('verdict-facts').replaceChildren(...facts.flatMap((fact) => [el('dt', { text: fact.label }), el('dd', { text: fact.value })]));
+  const appeal = state.appeals.find((item) => item.eventSeq === verdict.seq);
+  const status = appealStatus(appeal);
+  $('appeal-status').hidden = !status;
+  if (status) {
+    $('appeal-status').textContent = status.text;
+    $('appeal-status').dataset.tone = status.tone;
+  }
+  $('appeal-form').hidden = Boolean(appeal);
+  $('appeal-form').dataset.seq = String(verdict.seq);
+}
+
+async function submitAppeal(event) {
+  event.preventDefault();
+  const reason = $('appeal-reason').value;
+  if (!appealReasonOk(reason)) return void ($('appeal-error').textContent = '사유를 10자 이상 2000자 이하로 적어 주세요.');
+  const id = state.current.account.id;
+  const result = await api.createAppeal(id, Number($('appeal-form').dataset.seq), reason.trim());
+  if (!result.ok) return void ($('appeal-error').textContent = result.message);
+  $('appeal-error').textContent = '';
+  $('appeal-reason').value = '';
+  state.appeals = [...state.appeals, result.appeal];
+  renderVerdictCard();
+  toast('이의 제기를 접수했습니다.');
+}
+
 function renderActivity() {
   const lastSeq = state.current.events.at(-1)?.seq ?? 0;
   if (lastSeq === state.rendered.activity) return;
   state.rendered.activity = lastSeq;
+  renderVerdictCard();
   const verdicts = state.current.events.filter((event) => event.type === 'verdict');
   $('verdicts').replaceChildren(...(verdicts.length ? verdicts.map((event) => el('article', { class: `verdict ${event.verdict}` },
     el('strong', { text: describeEvent(event) }),
@@ -675,6 +817,11 @@ async function boot() {
     $('guide').hidden = true;
   });
   $('order-form').addEventListener('submit', submitOrder);
+  $('security-open').addEventListener('click', showSecurity);
+  $('mfa-start').addEventListener('click', startMfa);
+  $('mfa-form').addEventListener('submit', submitMfa);
+  $('mfa-disable').addEventListener('click', disableMfa);
+  $('appeal-form').addEventListener('submit', submitAppeal);
   $('order-form').addEventListener('input', renderTicket);
   $('order-form').addEventListener('change', (event) => {
     if (event.target.id === 'order-symbol') {

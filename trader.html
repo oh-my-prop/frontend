@@ -14,6 +14,8 @@
     <span class="sim-badge" title="실제 시장에 주문이 전달되지 않습니다">모의 거래 · 가상 USD</span>
     <div class="topbar-right">
       <a class="top-link" href="./index.html">개념 배우기</a>
+      <a id="admin-link" class="top-link" href="/admin.html" hidden>운영 콘솔</a>
+      <button id="security-open" class="ghost-btn" type="button" hidden>보안</button>
       <span id="user-label" class="user-label"></span>
       <button id="logout" class="ghost-btn" type="button" hidden>로그아웃</button>
     </div>
@@ -41,6 +43,11 @@
         <label for="auth-password">비밀번호</label>
         <input id="auth-password" type="password" autocomplete="current-password" required aria-describedby="auth-help">
         <p id="auth-help" class="field-help">10~200자. 다른 곳에서 쓰는 비밀번호는 쓰지 마세요.</p>
+        <div id="mfa-step" class="mfa-step" hidden>
+          <label for="auth-code">인증 앱의 6자리 코드</label>
+          <input id="auth-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-describedby="mfa-help">
+          <p id="mfa-help" class="field-help">2단계 인증을 켠 계정입니다. 비밀번호는 확인됐고, 5분 안에 코드를 입력해 주세요.</p>
+        </div>
         <button id="auth-submit" class="primary-btn" type="submit">로그인</button>
         <button id="auth-toggle" class="link-btn" type="button">처음이신가요? 계정 만들기</button>
         <p id="auth-error" class="form-error" role="alert"></p>
@@ -69,6 +76,37 @@
         <div id="program-list" class="program-grid"></div>
       </section>
 
+      <!-- Security settings -->
+      <section id="security" class="view" aria-labelledby="security-title" hidden>
+        <div class="view-head">
+          <p class="overline">계정 보안</p>
+          <h1 id="security-title">2단계 인증</h1>
+          <p class="muted">로그인할 때 비밀번호에 더해 인증 앱(Google Authenticator, 1Password 등)의 6자리 코드를 묻습니다. 운영 콘솔을 쓰는 계정은 반드시 켜야 합니다.</p>
+        </div>
+        <section class="panel">
+          <p id="mfa-status" class="mfa-status" role="status"></p>
+          <div id="mfa-setup" hidden>
+            <ol class="mfa-steps">
+              <li>인증 앱에서 <b>키 직접 입력</b>을 고르고 아래 키를 입력하세요. (계정 이름은 이메일, 시간 기준)</li>
+              <li>앱에 나온 6자리 코드를 입력해 켜기를 누르세요.</li>
+            </ol>
+            <p class="secret-label">설정 키</p>
+            <code id="mfa-secret" class="secret"></code>
+            <details class="small"><summary>otpauth 주소 (앱이 주소 붙여넣기를 지원할 때)</summary><code id="mfa-uri" class="secret uri"></code></details>
+          </div>
+          <form id="mfa-form" class="mfa-form" novalidate>
+            <label for="mfa-code" id="mfa-code-label">6자리 코드</label>
+            <input id="mfa-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6">
+            <div class="mfa-actions">
+              <button id="mfa-start" class="primary-btn" type="button">2단계 인증 설정 시작</button>
+              <button id="mfa-enable" class="primary-btn" type="submit" hidden>켜기</button>
+              <button id="mfa-disable" class="ghost-btn" type="button" hidden>끄기</button>
+            </div>
+            <p id="mfa-error" class="form-error" role="alert"></p>
+          </form>
+        </section>
+      </section>
+
       <!-- Trading dashboard -->
       <section id="dashboard" class="view" aria-labelledby="dash-title" hidden>
         <div class="dash-head">
@@ -93,6 +131,20 @@
         </div>
 
         <p id="dash-banner" class="banner" role="status" aria-live="polite"></p>
+
+        <section id="verdict-card" class="panel verdict-card" aria-labelledby="verdict-title" hidden>
+          <h2 id="verdict-title"></h2>
+          <p class="muted small">이 계정은 이제 읽기 전용입니다. 판정은 아래 근거 기록으로 언제든 같은 결과로 재현됩니다.</p>
+          <dl id="verdict-facts" class="facts"></dl>
+          <p id="appeal-status" class="appeal-status" role="status" hidden></p>
+          <form id="appeal-form" class="appeal-form" novalidate hidden>
+            <label for="appeal-reason">판정이 잘못됐다고 생각하면 이의를 제기하세요</label>
+            <textarea id="appeal-reason" rows="3" maxlength="2000" aria-describedby="appeal-help"></textarea>
+            <p id="appeal-help" class="field-help">10자 이상. 예: 그 시각 시세가 다른 거래소와 크게 달랐습니다. 검토자가 근거 기록을 다시 계산해 답합니다.</p>
+            <button class="ghost-btn" type="submit">이의 제기</button>
+            <p id="appeal-error" class="form-error" role="alert"></p>
+          </form>
+        </section>
 
         <div class="stats">
           <div class="stat"><span class="stat-label">잔고</span><strong id="sum-balance"></strong><span class="stat-help">이미 확정된 돈</span></div>

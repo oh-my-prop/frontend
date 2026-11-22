@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>운영 콘솔 | Oh My Prop</title>
+  <link rel="stylesheet" href="./src/trader/trader.css">
+  <link rel="stylesheet" href="./src/admin/admin.css">
+  <script type="module" src="./src/admin/admin.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="logo" href="/trader.html"><span class="logo-mark">P</span> OH MY PROP</a>
+    <span class="sim-badge ops-badge">운영 콘솔 · 열람 기록됨</span>
+    <div class="topbar-right">
+      <span id="staff-label" class="user-label"></span>
+      <a class="top-link" href="/trader.html">트레이더 화면</a>
+    </div>
+  </header>
+
+  <p id="page-status" class="toast" role="status" aria-live="polite" hidden></p>
+
+  <main id="locked" class="locked" hidden>
+    <section class="panel">
+      <h1>운영 콘솔을 열 수 없습니다</h1>
+      <p id="locked-reason" class="muted"></p>
+      <p><a class="primary-link" href="/trader.html">트레이더 화면에서 로그인·보안 설정하기</a></p>
+    </section>
+  </main>
+
+  <div id="console" class="console" hidden>
+    <nav class="tabs" aria-label="콘솔 메뉴">
+      <button type="button" class="tab" data-view="overview" aria-current="page">개요</button>
+      <button type="button" class="tab" data-view="accounts">계정</button>
+      <button type="button" class="tab" data-view="appeals">이의 제기 <span id="appeal-count" class="count"></span></button>
+      <button type="button" class="tab" data-view="risk">부정거래 대기열</button>
+      <button type="button" class="tab" data-view="audit" id="audit-tab">감사 기록</button>
+    </nav>
+
+    <section id="view-overview" class="view" aria-labelledby="overview-title">
+      <h1 id="overview-title">개요</h1>
+      <div id="overview-stats" class="stats"></div>
+      <section class="panel">
+        <h2>시세 상태</h2>
+        <p id="market-health" class="muted"></p>
+      </section>
+      <section class="panel">
+        <h2>최근 24시간 판정</h2>
+        <div id="verdict-stats" class="chips"></div>
+      </section>
+    </section>
+
+    <section id="view-accounts" class="view" aria-labelledby="accounts-title" hidden>
+      <h1 id="accounts-title">계정</h1>
+      <div class="filters">
+        <label for="account-status">상태</label>
+        <select id="account-status">
+          <option value="">전체</option>
+          <option value="active">진행 중</option>
+          <option value="passed">통과</option>
+          <option value="breached">위반 종료</option>
+          <option value="expired">기간 만료</option>
+          <option value="withdrawn">철회</option>
+        </select>
+        <label for="account-search">계정 번호로 열기</label>
+        <input id="account-search" inputmode="numeric" placeholder="예: 12">
+      </div>
+      <div class="table-wrap"><table class="table" aria-describedby="accounts-title">
+        <thead><tr><th scope="col">#</th><th scope="col">사용자</th><th scope="col">상품</th><th scope="col">상태</th><th scope="col">수익률</th><th scope="col">거래일</th><th scope="col">개설</th></tr></thead>
+        <tbody id="account-rows"></tbody>
+      </table></div>
+      <section id="account-detail" class="panel detail" hidden aria-labelledby="detail-title">
+        <div class="detail-head">
+          <h2 id="detail-title"></h2>
+          <button id="verify-replay" class="ghost-btn" type="button">판정 재현 검사</button>
+        </div>
+        <p id="verify-result" class="verify-result" role="status" hidden></p>
+        <dl id="detail-facts" class="facts"></dl>
+        <h3 class="sub-head">이벤트 기록</h3>
+        <ol id="detail-events" class="activity"></ol>
+      </section>
+    </section>
+
+    <section id="view-appeals" class="view" aria-labelledby="appeals-title" hidden>
+      <h1 id="appeals-title">이의 제기</h1>
+      <div class="filters">
+        <label for="appeal-filter">상태</label>
+        <select id="appeal-filter">
+          <option value="open">대기</option>
+          <option value="">전체</option>
+          <option value="upheld">유지</option>
+          <option value="overturned">번복</option>
+        </select>
+      </div>
+      <div id="appeal-list" class="cards"></div>
+    </section>
+
+    <section id="view-risk" class="view" aria-labelledby="risk-title" hidden>
+      <h1 id="risk-title">부정거래 대기열</h1>
+      <p class="muted">오프라인 탐지 작업(data 저장소 <code>npm run detect:live</code>)이 올린 최신 결과입니다. 자동으로 계정을 막지 않습니다. 사람이 근거를 보고 판단합니다.</p>
+      <p id="risk-meta" class="muted small"></p>
+      <h2 class="sub-head">연결된 계정 그룹</h2>
+      <div id="risk-groups" class="cards"></div>
+      <h2 class="sub-head">심사 순서</h2>
+      <div class="table-wrap"><table class="table">
+        <thead><tr><th scope="col">순위</th><th scope="col">계정</th><th scope="col">경로</th><th scope="col">행동 점수</th><th scope="col">근거</th></tr></thead>
+        <tbody id="risk-rows"></tbody>
+      </table></div>
+    </section>
+
+    <section id="view-audit" class="view" aria-labelledby="audit-title" hidden>
+      <h1 id="audit-title">감사 기록</h1>
+      <p class="muted">관리자만 볼 수 있습니다. 계정 열람, 판정 재현 검사, 이의 결정, 권한 변경, 2단계 인증 변경이 남습니다.</p>
+      <div class="table-wrap"><table class="table">
+        <thead><tr><th scope="col">시각</th><th scope="col">사용자</th><th scope="col">행동</th><th scope="col">대상</th><th scope="col">내용</th></tr></thead>
+        <tbody id="audit-rows"></tbody>
+      </table></div>
+    </section>
+  </div>
+</body>
+</html>

@@ -182,6 +182,28 @@ input:disabled, select:disabled { opacity: .5; }
 .ticker { display: grid; gap: 2px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); text-align: left; cursor: pointer; }
 .ticker.selected { border-color: var(--accent); }
 .chart { margin: 14px 0 0; }
+/* ---- verdict card, appeals, two-factor ---- */
+.verdict-card { border-color: var(--sell); }
+.verdict-card h2 { color: var(--sell); margin-bottom: 4px; }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 14px 0; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; font-variant-numeric: tabular-nums; }
+.appeal-status { padding: 10px 12px; border-radius: 8px; background: var(--surface-2); border-left: 4px solid var(--info); }
+.appeal-status[data-tone="warn"] { border-left-color: var(--warn); }
+.appeal-status[data-tone="ok"] { border-left-color: var(--buy); }
+.appeal-form { display: grid; gap: 8px; margin-top: 10px; }
+.appeal-form textarea { width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); resize: vertical; }
+.mfa-step { display: grid; gap: 6px; margin-top: 6px; }
+.mfa-status { font-weight: 700; margin-bottom: 12px; }
+.mfa-status[data-on="true"]::before { content: '● '; color: var(--buy); }
+.mfa-status[data-on="false"]::before { content: '○ '; color: var(--muted); }
+.mfa-steps { padding-left: 20px; display: grid; gap: 4px; margin: 0 0 12px; }
+.secret-label { color: var(--muted); font-size: .8rem; }
+.secret { display: block; padding: 10px 12px; margin: 4px 0 10px; border-radius: 8px; background: var(--surface-2); font-size: 1.05rem; letter-spacing: .06em; word-break: break-all; user-select: all; }
+.secret.uri { font-size: .75rem; letter-spacing: 0; }
+.mfa-form { display: grid; gap: 8px; max-width: 360px; }
+.mfa-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.mfa-actions .primary-btn { width: auto; }
 .chart-head { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; margin-bottom: 6px; }
 .chart-readout { color: var(--muted); font-variant-numeric: tabular-nums; white-space: pre; }
 .chart-readout[data-dir="1"] { color: var(--buy); }

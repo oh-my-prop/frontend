@@ -39,6 +39,12 @@ export const getMe = () => request('GET', '/api/v1/auth/me');
 export const login = (email, password) => request('POST', '/api/v1/auth/login', { body: { email, password } });
 export const register = (email, password) => request('POST', '/api/v1/auth/register', { body: { email, password } });
 export const logout = () => request('POST', '/api/v1/auth/logout');
+export const loginTotp = (challenge, code) => request('POST', '/api/v1/auth/login/totp', { body: { challenge, code } });
+export const totpSetup = () => request('POST', '/api/v1/auth/totp/setup');
+export const totpEnable = (code) => request('POST', '/api/v1/auth/totp/enable', { body: { code } });
+export const totpDisable = (code) => request('POST', '/api/v1/auth/totp/disable', { body: { code } });
+export const getAppeals = (id) => request('GET', `/api/v2/accounts/${id}/appeals`);
+export const createAppeal = (id, eventSeq, reason) => request('POST', `/api/v2/accounts/${id}/appeals`, { body: { eventSeq, reason } });
 
 export const listPrograms = () => request('GET', '/api/v2/programs');
 export const getProgram = (code, version) => request('GET', `/api/v2/programs/${encodeURIComponent(code)}/versions/${version}`);

@@ -47,6 +47,11 @@ export const listAccounts = () => request('GET', '/api/v2/accounts');
 export const getAccount = (id) => request('GET', `/api/v2/accounts/${id}`);
 export const getEvents = (id, after = 0) => request('GET', `/api/v2/accounts/${id}/events?after=${after}&limit=1000`);
 export const getQuotes = () => request('GET', '/api/v2/market/quotes');
+export function getCandles(symbol, { since, limit = 240 } = {}) {
+  const query = new URLSearchParams({ symbol, limit: String(limit) });
+  if (since) query.set('since', since);
+  return request('GET', `/api/v2/market/candles?${query}`);
+}
 
 export const openAccount = (program, version, acceptedRulesSha256) =>
   request('POST', '/api/v2/accounts', { body: { program, version, acceptedRulesSha256 } });

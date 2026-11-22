@@ -2,6 +2,8 @@
 // (no innerHTML), and no inline style attributes (the CSP forbids them).
 
 import * as api from './api.js';
+import { createCandleChart } from './chart.js';
+import { mergeCandles, midText } from './chart-scale.js';
 import { formatCents, formatSignedCents, formatTimestamp } from './format.js';
 import {
   describeEvent, describeRule, limitCards, objectiveCards, orderNotional, phaseLabel,
@@ -25,6 +27,8 @@ const state = {
   closeStream: null,
   quoteTimer: null,
   pendingOrder: null, // { key, body } kept when a send failed to reach the server
+  chart: null,
+  candles: { symbol: null, list: [], loading: null },
   rendered: { positions: null, orders: null, activity: null },
 };
 
@@ -223,6 +227,7 @@ async function selectAccount(id) {
   renderInstruments();
   renderRuleDetail();
   renderDashboard();
+  loadCandles();
   renderAccounts();
   if (account.status === 'active') {
     state.closeStream = api.openStream(id, {
@@ -272,6 +277,64 @@ async function refreshQuotes() {
   renderMarket();
   renderQuoteLine();
   renderTicket();
+  refreshCandles();
+}
+
+// ---- chart -------------------------------------------------------------------------
+
+async function loadCandles() {
+  const symbol = $('order-symbol').value;
+  if (!symbol) return;
+  state.chart ??= createCandleChart({ canvas: $('price-chart'), readout: $('chart-readout') });
+  state.candles = { symbol, list: [], loading: null };
+  $('chart-symbol').textContent = symbol;
+  renderChart();
+  const result = await api.getCandles(symbol, { limit: 240 });
+  if (state.candles.symbol !== symbol || !result.ok) return;
+  state.candles.list = result.candles;
+  renderChart();
+}
+
+// Re-fetch from the newest stored bar on; that bar is replaced by its updated version.
+async function refreshCandles() {
+  const { symbol, list, loading } = state.candles;
+  if (!symbol || loading) return;
+  const since = list.at(-1)?.t;
+  state.candles.loading = api.getCandles(symbol, { since, limit: since ? 1440 : 240 });
+  const result = await state.candles.loading;
+  if (state.candles.symbol !== symbol) return;
+  state.candles.loading = null;
+  if (!result.ok) return;
+  state.candles.list = since ? mergeCandles(state.candles.list, result.candles) : result.candles;
+  renderChart();
+}
+
+function chartLines(symbol) {
+  const { account } = state.current;
+  const lines = account.positions
+    .filter((position) => position.symbol === symbol)
+    .map((position) => ({ price: position.averagePrice, kind: 'entry', label: `평균 진입가 (${position.side === 'long' ? '매수' : '매도'} ${position.qty})` }));
+  for (const order of account.openOrders) {
+    if (order.symbol !== symbol || order.price == null) continue;
+    const kind = order.reduceOnly ? (order.orderType === 'stop' ? 'stop' : 'take') : 'order';
+    const label = { stop: '손절', take: '익절', order: order.orderType === 'stop' ? '스톱 대기' : '지정가 대기' }[kind];
+    lines.push({ price: order.price, kind, label: `${label} ${order.side === 'buy' ? '매수' : '매도'} ${order.qty}` });
+  }
+  return lines;
+}
+
+function renderChart() {
+  if (!state.chart || !state.current) return;
+  const symbol = state.candles.symbol;
+  const instrument = state.current.spec.instruments.find((item) => item.symbol === symbol);
+  if (!instrument) return;
+  const quote = state.quotes.get(symbol);
+  state.chart.update({
+    candles: state.candles.list,
+    decimals: instrument.priceDecimals,
+    lastPrice: quote?.status === 'ok' ? midText(quote.bid, quote.ask, instrument.priceDecimals) : null,
+    lines: chartLines(symbol),
+  });
 }
 
 function renderStreamStatus(status) {
@@ -318,6 +381,7 @@ function renderDashboard() {
   renderTicket();
   const tradable = account.status === 'active' && !account.paused;
   for (const node of $('order-form').elements) node.disabled = !tradable;
+  renderChart();
 }
 
 function renderGauges() {
@@ -374,6 +438,7 @@ function renderMarket() {
       onclick: () => {
         $('order-symbol').value = instrument.symbol;
         renderMarket();
+        loadCandles();
         renderQuoteLine();
         renderQtyPresets();
         renderTicket();
@@ -614,6 +679,7 @@ async function boot() {
   $('order-form').addEventListener('change', (event) => {
     if (event.target.id === 'order-symbol') {
       renderMarket();
+      loadCandles();
       renderQtyPresets();
     }
     renderQuoteLine();

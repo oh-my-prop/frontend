@@ -112,8 +112,12 @@
         <div class="trade-grid">
           <div class="trade-left">
             <section class="panel" aria-labelledby="market-title">
-              <div class="panel-head"><h2 id="market-title">시세</h2><p class="muted small">모의 시세 · 실제 시세 아님</p></div>
+              <div class="panel-head"><h2 id="market-title">시세</h2><p class="muted small">가상 체결 · 실제 주문은 나가지 않음</p></div>
               <div id="market" class="market"></div>
+              <figure class="chart">
+                <figcaption class="chart-head"><strong id="chart-symbol"></strong><span id="chart-readout" class="chart-readout small"></span></figcaption>
+                <canvas id="price-chart" class="price-chart" role="img" aria-label="1분 봉 차트"></canvas>
+              </figure>
             </section>
             <section class="panel" aria-labelledby="pos-title">
               <div class="panel-head"><h2 id="pos-title">보유 포지션</h2></div>

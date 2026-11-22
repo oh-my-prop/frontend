@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1412">
+  <title>상품 규칙 | Oh My Prop</title>
+  <link rel="stylesheet" href="./src/site/site.css">
+  <link rel="stylesheet" href="./src/site/nav.css">
+  <script type="module" src="./src/site/nav.js"></script>
+  <script type="module" src="./src/site/rules.js"></script>
+</head>
+<body data-page="rules">
+  <p class="sim-notice" role="note"><span aria-hidden="true">⚠</span> 시뮬레이션 계정 — 실제 시장에 주문이 전달되지 않습니다</p>
+  <div id="site-header"></div>
+
+  <main id="main" class="page">
+    <header class="page-head">
+      <p class="overline">Program rules</p>
+      <h1 id="rules-title">상품 규칙</h1>
+      <p id="rules-intro">아래 설명은 서버가 판정에 쓰는 규칙 명세(JSON)에서 그대로 생성됩니다. 규칙 버전 해시가 같으면 화면 설명과 서버 판정이 같은 규칙입니다.</p>
+    </header>
+
+    <div id="rules-body" aria-live="polite"><p class="status-msg" role="status">규칙을 불러오는 중입니다…</p></div>
+
+    <section class="section" aria-labelledby="versioning-title">
+      <h2 id="versioning-title">규칙 버전 원칙</h2>
+      <ul class="rule-list">
+        <li><strong>계정을 연 시점의 버전이 끝까지 적용됩니다</strong><span>계정을 열 때 동의한 규칙 버전(해시)은 그 계정이 종료될 때까지 바뀌지 않습니다.</span></li>
+        <li><strong>새 버전은 14일 전에 공지합니다</strong><span>규칙을 바꿀 때는 새 버전으로만 출시하며, 출시 14일 전에 공지합니다. 이미 열린 계정에는 소급하지 않습니다.</span></li>
+        <li><strong>판정에는 근거가 붙습니다</strong><span>위반·통과 판정마다 규칙, 기준값, 관측값, 시각, 근거 이벤트를 보여 주며 이의를 제기할 수 있습니다.</span></li>
+      </ul>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+</body>
+</html>

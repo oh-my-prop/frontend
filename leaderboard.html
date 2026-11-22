@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1412">
+  <title>시즌 순위표 | Oh My Prop</title>
+  <link rel="stylesheet" href="./src/site/site.css">
+  <link rel="stylesheet" href="./src/site/nav.css">
+  <script type="module" src="./src/site/nav.js"></script>
+  <script type="module" src="./src/site/leaderboard.js"></script>
+</head>
+<body data-page="leaderboard">
+  <p class="sim-notice" role="note"><span aria-hidden="true">⚠</span> 시뮬레이션 계정 — 실제 시장에 주문이 전달되지 않습니다</p>
+  <div id="site-header"></div>
+
+  <main id="main" class="page">
+    <header class="page-head">
+      <p class="overline">Season leaderboard</p>
+      <h1>시즌 순위표</h1>
+      <p>무료 시즌에서 규칙을 지키고 있거나 통과한 계정만 수익률 순으로 보여 줍니다. 규칙 위반으로 종료된 계정은 오르지 않습니다. 참가자는 익명 번호로만 표시되며, 순위에 따른 보상은 없습니다.</p>
+    </header>
+
+    <form id="program-form" class="field-row" novalidate>
+      <div>
+        <label for="program-select">시즌 상품</label>
+        <select id="program-select" disabled><option value="">불러오는 중…</option></select>
+      </div>
+      <a id="rules-link" class="small" href="/rules.html">이 상품의 규칙 보기</a>
+    </form>
+
+    <section class="section" aria-labelledby="board-title">
+      <h2 id="board-title" class="visually-hidden">순위</h2>
+      <div id="board" aria-live="polite"><p class="status-msg" role="status">순위를 불러오는 중입니다…</p></div>
+      <p class="small muted section-foot">수익률 = (현재 에쿼티 − 초기 잔고) ÷ 초기 잔고. 미실현 손익이 포함된 시뮬레이션 수치이며 실현된 수익이 아닙니다.</p>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+</body>
+</html>

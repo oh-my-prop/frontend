@@ -4,15 +4,19 @@
 
 이 문서는 프랍 트레이딩 서비스 전환 후 `frontend` 저장소가 만들 화면과 사용자 흐름을 정의한다. 서버 계약은 `oh-my-prop/backend`의 `docs/PROP-PLATFORM-DESIGN.md`, 규칙 명세 형식은 `oh-my-prop/data`의 `schemas/program-rules.schema.json`을 따른다.
 
-## 0. 구현 상태 (2026-11-14)
+## 0. 구현 상태 (2026-11-23)
 
 | 범위 | 상태 |
 | --- | --- |
 | `/trader.html` 단일 화면: 로그인, 상품·규칙 확인, 계정 개설, 계정 목록 | 구현 |
 | 계정 대시보드: 고지 바, 요약, 손실 한도 카드(경고 단계), 목표 카드, 주문(손절 미리보기), 포지션·미체결·판정·활동 기록, SSE 실시간 갱신 | 구현 |
-| 순위표 화면, 판정 이의 제기, 2단계 인증, 결제·보상 화면, `/academy/` 경로 재배치 | 미구현 |
+| 공개 화면(로그인 불필요): 홈 `/`(시뮬레이션 고지, 무료 시즌 요약, 상품 비교 — 유료는 "준비 중"만 표시), 순위표 `/leaderboard.html`, 규칙 설명 `/rules.html?program=&version=`(명세에서 생성, 버전 해시 표시), 공용 머리말·꼬리말(`src/site/nav.js`) | 구현 |
+| 아카데미 재배치: `/academy/index.html`(계산기·리셋 비교), `/academy/journal.html`(연습장). 저장 키·백업 형식 유지, `/journal.html`은 이동 안내 | 구현 |
+| G0 법률 문서 초안: `/legal/terms.html`, `/legal/privacy.html`(초안 배너, [확정 필요] 표시) | 초안(법률 검토 전) |
+| 금지 표현 검사(`src/site/banned-phrases.js`, `test/banned-phrases.test.mjs`), 링크·CSP 검사(`test/site-links.test.mjs`) | 구현 |
+| 판정 이의 제기 화면, 2단계 인증, 결제·보상 화면, 통계 공개 `/transparency` | 미구현 |
 
-1절의 경로 구조(`/app/...`) 대신 지금은 `trader.html` 한 장에 섹션으로 구성했습니다. 화면 수치는 서버 스냅샷의 규칙 결과를 그대로 쓰고, 화면 쪽 계산(`src/trader/view.js`)은 설명·경고 단계·손절 미리보기에만 씁니다.
+1절의 경로 구조(`/app/...`) 대신 지금은 `trader.html` 한 장에 섹션으로 구성했습니다. `/rules/<program>`과 `/leaderboard`는 정적 서버에서도 동작하도록 `rules.html?program=&version=`, `leaderboard.html`로 구현했습니다. 화면 수치는 서버 스냅샷의 규칙 결과를 그대로 쓰고, 화면 쪽 계산(`src/trader/view.js`)은 설명·경고 단계·손절 미리보기에만 씁니다.
 
 ## 1. 정보 구조
 

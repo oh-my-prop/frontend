@@ -67,6 +67,7 @@
         <button id="new-account" class="ghost-btn small" type="button">+ 새 계정</button>
       </div>
       <div id="account-list" class="account-list"></div>
+      <button id="open-checkout" class="link-btn small" type="button">구매·주문 내역</button>
     </aside>
 
     <main class="main">
@@ -78,6 +79,31 @@
           <p class="muted">처음이라면 <strong>무료 시즌 챌린지</strong>를 추천합니다. 계정을 열면 그때의 규칙이 끝까지 그대로 적용됩니다.</p>
         </div>
         <div id="program-list" class="program-grid"></div>
+      </section>
+
+      <!-- Paid evaluation checkout (제품 명세 §2.3) -->
+      <section id="checkout" class="view" aria-labelledby="checkout-title" hidden>
+        <div class="view-head">
+          <p class="overline">유료 평가 구매</p>
+          <h1 id="checkout-title">규칙 확인 → 결제 → 계정 발급</h1>
+          <p class="muted">결제 금액은 <strong>원화</strong>, 거래 계정 잔고는 <strong>가상 USD</strong>입니다. 서로 다른 돈이며 교환되지 않습니다.</p>
+        </div>
+        <p id="checkout-message" class="banner" role="status" aria-live="polite" hidden></p>
+        <div id="checkout-product"></div>
+        <section id="checkout-pay" class="panel pay-panel" aria-labelledby="pay-title" tabindex="-1" hidden>
+          <div class="panel-head">
+            <h2 id="pay-title">결제</h2>
+            <p class="muted small">결제 결과와 계정 발급은 서버의 같은 기록으로만 표시합니다.</p>
+          </div>
+          <div id="pay-body"></div>
+        </section>
+        <section id="checkout-orders-panel" class="panel" aria-labelledby="orders-title">
+          <div class="panel-head">
+            <h2 id="orders-title">주문 내역</h2>
+            <p class="muted small">거래를 시작하기 전까지는 청약 철회할 수 있습니다.</p>
+          </div>
+          <div id="checkout-orders"></div>
+        </section>
       </section>
 
       <!-- Security settings -->

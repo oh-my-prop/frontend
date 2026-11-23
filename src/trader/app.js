@@ -12,6 +12,8 @@ import {
 } from './view.js';
 import { formatWinRate, tradeReview } from './review.js';
 import { adverseVerdict, appealReasonOk, appealStatus, groupSecret, verdictFacts } from './ops-view.js';
+import { accountsSynced, closeCheckout, initCheckout, openCheckout } from './checkout.js';
+import { PAID_NOTICE } from '../site/view.js';
 
 const $ = (id) => document.getElementById(id);
 const QUOTE_POLL_MS = 2000;
@@ -131,6 +133,7 @@ async function submitCode() {
 
 function showSecurity() {
   closeDashboard();
+  closeCheckout();
   $('catalog').hidden = true;
   $('security').hidden = false;
   renderSecurity();
@@ -214,6 +217,7 @@ async function loadWorkspace() {
 
 function showCatalog() {
   closeDashboard();
+  closeCheckout();
   $('security').hidden = true;
   $('catalog').hidden = false;
   renderAccounts();
@@ -237,12 +241,19 @@ function renderPrograms() {
         })),
       )),
     );
+    // 무료는 그 자리에서 계정을 열고, 유료는 결제가 필요하므로 구매 화면으로 보낸다.
     const checkbox = el('input', { type: 'checkbox', id: `accept-${program.program}` });
     const button = el('button', { class: 'primary-btn', type: 'button', text: '이 규칙으로 계정 열기' });
-    checkbox.disabled = !program.available;
     button.disabled = true;
-    checkbox.addEventListener('change', () => { button.disabled = !checkbox.checked || !program.available; });
+    checkbox.addEventListener('change', () => { button.disabled = !checkbox.checked; });
     button.addEventListener('click', () => openAccount(program, button));
+    const cta = program.free
+      ? el('div', { class: 'program-cta' },
+        el('label', { class: 'accept', for: checkbox.id }, checkbox, el('span', { text: '규칙을 읽었고 동의합니다' })),
+        button)
+      : el('div', { class: 'program-cta' },
+        el('p', { class: 'muted small', text: '규칙 전문과 청약 철회 조건을 확인한 뒤 결제합니다.' }),
+        el('button', { class: 'primary-btn', type: 'button', text: '구매 절차 보기', onclick: () => openCheckout(program, entry) }));
     return el('article', { class: `program-card${program.free ? ' featured' : ''}` },
       el('div', { class: 'program-top' },
         el('span', { class: `tag ${program.free ? 'free' : 'paid'}`, text: program.free ? '무료 · 추천' : '유료 평가' }),
@@ -254,10 +265,8 @@ function renderPrograms() {
       el('ul', { class: 'chips' }, chips.map((chip) => el('li', { class: `chip ${chip.tone}`, text: chip.text }))),
       details,
       program.available
-        ? el('div', { class: 'program-cta' },
-          el('label', { class: 'accept', for: checkbox.id }, checkbox, el('span', { text: '규칙을 읽었고 동의합니다' })),
-          button)
-        : el('p', { class: 'soon', text: '출시 준비 중 — 아직 열 수 없습니다' }),
+        ? cta
+        : el('p', { class: 'soon', text: program.free ? '출시 준비 중 — 아직 열 수 없습니다' : PAID_NOTICE }),
     );
   }));
 }
@@ -278,7 +287,7 @@ async function openAccount(program, button) {
 
 function statusText(account) {
   if (account.status === 'active') return account.paused ? '오늘 정지' : '진행 중';
-  return { breached: '위반 종료', passed: '통과', expired: '만료' }[account.status] ?? account.status;
+  return { breached: '위반 종료', passed: '통과', expired: '만료', withdrawn: '청약 철회' }[account.status] ?? account.status;
 }
 
 function renderAccounts() {
@@ -332,6 +341,7 @@ async function selectAccount(id) {
   if (!entry) return toast('상품 규칙을 불러오지 못했습니다.', 'warning');
   const phase = entry.spec.phases.find((item) => item.id === account.phase);
   state.current = { account, spec: entry.spec, phase, events: events.ok ? events.events : [] };
+  closeCheckout();
   $('catalog').hidden = true;
   $('security').hidden = true;
   $('dashboard').hidden = false;
@@ -369,6 +379,7 @@ async function refreshAccounts() {
   if (result.ok) {
     state.accounts = result.accounts;
     renderAccounts();
+    accountsSynced();
   }
 }
 
@@ -867,6 +878,18 @@ async function boot() {
   });
   $('logout').addEventListener('click', doLogout);
   $('new-account').addEventListener('click', showCatalog);
+  $('open-checkout').addEventListener('click', () => openCheckout(null, null));
+  initCheckout({
+    closeOthers: () => {
+      closeDashboard();
+      $('catalog').hidden = true;
+      $('security').hidden = true;
+    },
+    openAccount: (id) => selectAccount(id),
+    accountsChanged: refreshAccounts,
+    accounts: () => state.accounts,
+    showCatalog,
+  });
   $('guide-close').addEventListener('click', () => {
     localStorage.setItem(GUIDE_KEY, '1');
     $('guide').hidden = true;

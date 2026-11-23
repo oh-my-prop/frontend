@@ -4,7 +4,7 @@
 const TIMEOUT_MS = 10000;
 const OFFLINE = { ok: false, code: 'offline', status: 0, message: '서버에 연결할 수 없습니다.' };
 
-function newKey() {
+export function newKey() {
   if (globalThis.crypto?.randomUUID) return `ord-${globalThis.crypto.randomUUID()}`;
   return `ord-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
@@ -61,6 +61,22 @@ export function getCandles(symbol, { since, limit = 240 } = {}) {
 
 export const openAccount = (program, version, acceptedRulesSha256) =>
   request('POST', '/api/v2/accounts', { body: { program, version, acceptedRulesSha256 } });
+
+// Checkout (paid evaluations). The order is created with a client-made
+// Idempotency-Key that is reused on every retry, so a resend cannot charge twice.
+export const createOrder = (program, version, acceptedRulesSha256, key) =>
+  request('POST', '/api/v2/checkout', { body: { program, version, acceptedRulesSha256 }, headers: { 'Idempotency-Key': key } });
+export const listOrders = () => request('GET', '/api/v2/checkout');
+export const getOrder = (orderId) => request('GET', `/api/v2/checkout/${encodeURIComponent(orderId)}`);
+export const confirmOrder = (orderId, paymentKey, amountKrw) =>
+  request('POST', `/api/v2/checkout/${encodeURIComponent(orderId)}/confirm`, { body: { paymentKey, amountKrw } });
+export const refundOrder = (orderId) => request('POST', `/api/v2/checkout/${encodeURIComponent(orderId)}/refund`);
+
+// There is no real payment widget yet. These two exist only when the server runs with
+// MONEY_DEV_TOOLS (never in production); the probe is how the screen finds that out,
+// because no production endpoint reports it (backend/src/api-money.js:84).
+export const devToolsAvailable = () => request('GET', '/api/v2/dev/money/state').then((result) => result.ok === true);
+export const devMockPay = (orderId) => request('POST', '/api/v2/dev/mock/pay', { body: { orderId } });
 
 // The idempotency key is created once per user action and reused on retry, so a
 // timed-out request can be sent again without trading twice.

@@ -14,7 +14,10 @@
 | 아카데미 재배치: `/academy/index.html`(계산기·리셋 비교), `/academy/journal.html`(연습장). 저장 키·백업 형식 유지, `/journal.html`은 이동 안내 | 구현 |
 | G0 법률 문서 초안: `/legal/terms.html`, `/legal/privacy.html`(초안 배너, [확정 필요] 표시) | 초안(법률 검토 전) |
 | 금지 표현 검사(`src/site/banned-phrases.js`, `test/banned-phrases.test.mjs`), 링크·CSP 검사(`test/site-links.test.mjs`) | 구현 |
-| 판정 이의 제기 화면, 2단계 인증, 결제·보상 화면, 통계 공개 `/transparency` | 미구현 |
+| 판정 카드와 이의 제기(`/trader.html`), 2단계 인증 로그인·설정, 운영 콘솔 `/admin.html`(개요·계정·재현 검사·이의 결정·부정거래 대기열·감사 기록) | 구현 |
+| 거래 복기 패널: 누적 확정 손익·수수료·닫은 거래 승패·승률(본전 제외)·최대 잔고 하락액(체결 시점 잔고 기준)·최대 이익/손실·처음 규칙 위반. 엔진 이벤트에서 계산(`src/trader/review.js`), 저장하지 않음 | 구현 |
+| 디자인 시스템: 공용 토큰, 라이트/다크 테마 | 구현 |
+| 결제·보상 화면(0.6~0.7), 통계 공개 `/transparency`(1.0) | 미구현(해당 릴리스 범위) |
 
 1절의 경로 구조(`/app/...`) 대신 지금은 `trader.html` 한 장에 섹션으로 구성했습니다. `/rules/<program>`과 `/leaderboard`는 정적 서버에서도 동작하도록 `rules.html?program=&version=`, `leaderboard.html`로 구현했습니다. 화면 수치는 서버 스냅샷의 규칙 결과를 그대로 쓰고, 화면 쪽 계산(`src/trader/view.js`)은 설명·경고 단계·손절 미리보기에만 씁니다.
 

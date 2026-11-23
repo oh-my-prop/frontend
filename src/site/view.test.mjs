@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  PAID_NOTICE, formatReturnBps, leaderboardRows, parseProgramQuery, programCard, rulesDocument, sortPrograms, statusBadge,
+  PAID_NOTICE, formatReturnBps, leaderboardRows, parseProgramQuery, programCard, publicStatsView,
+  rulesDocument, sortPrograms, statusBadge,
 } from './view.js';
 
 const seasonSpec = {
@@ -43,6 +44,55 @@ test('paid program card shows only the pending notice, never joinable', () => {
   assert.equal(card.phasesText, '평가 1단계 → 평가 2단계 → 펀딩');
   assert.deepEqual(card.chips, []);
   assert.doesNotMatch(JSON.stringify(card), /₩|원\b|80%/);
+});
+
+test('a price appears only when the server says the product is on sale', () => {
+  const onSale = programCard({ ...paid, saleState: 'for_sale', priceKrw: 190000 }, null);
+  assert.equal(onSale.priceText, '190,000원');
+  assert.equal(onSale.priceLabel, '190,000원');
+  assert.equal(onSale.canBuy, true);
+  assert.equal(onSale.kindText, '유료 평가');
+
+  // 플래그가 꺼졌거나 가격이 없으면 서버가 priceKrw를 주지 않는다. 화면도 숫자를 만들지 않는다.
+  for (const program of [{ ...paid, saleState: 'preparing', priceKrw: null }, { ...paid, saleState: 'for_sale', priceKrw: null }]) {
+    const card = programCard(program, null);
+    assert.equal(card.priceText, null, JSON.stringify(program));
+    assert.equal(card.priceLabel, '준비 중');
+    assert.equal(card.canBuy, false);
+    assert.equal(card.status.text, PAID_NOTICE);
+    assert.doesNotMatch(JSON.stringify(card), /\d{1,3},\d{3}원|₩/);
+  }
+
+  // 무료 시즌은 결제가 없다. saleState가 없는 옛 서버 응답도 유료는 준비 중으로 본다.
+  assert.equal(programCard({ ...season, saleState: 'free' }, seasonSpec).priceLabel, '무료');
+  assert.equal(programCard(paid, null).saleState, 'preparing');
+});
+
+test('public stats hide every number for a small sample instead of showing zeros', () => {
+  const view = publicStatsView({
+    generatedAt: '2026-11-24T02:03:04.000Z',
+    programs: [
+      { program: 'omp-season-25k', version: 1, accounts: 12, traded: 9, passed: 2, breached: 5, expired: 1, running: 4, passRateBps: 2500, smallSample: false },
+      { program: 'omp-2step-25k', version: 1, accounts: null, traded: null, passed: null, breached: null, expired: null, running: null, passRateBps: null, smallSample: true },
+    ],
+  });
+  assert.equal(view.generatedAtText, '2026-11-24 02:03 UTC');
+  assert.equal(view.shown, 1);
+  assert.deepEqual(
+    [view.rows[0].accountsText, view.rows[0].tradedText, view.rows[0].runningText, view.rows[0].passedText, view.rows[0].breachedText, view.rows[0].expiredText, view.rows[0].passRateText],
+    ['12개', '9개', '4개', '2개', '5개', '1개', '25%'],
+  );
+  assert.equal(view.rows[1].small, true);
+  assert.equal(view.rows[1].accountsText, '아직 공개할 표본이 없습니다');
+  assert.doesNotMatch(JSON.stringify(view.rows[1]), /\d개|%/);
+
+  // 종료된 계정이 0이면 서버가 passRateBps를 주지 않는다. 0%로 바꿔 그리면 거짓이 된다.
+  const noneClosed = publicStatsView({ programs: [{ program: 'omp-season-25k', version: 1, accounts: 7, traded: 3, passed: 0, breached: 0, expired: 0, running: 7, passRateBps: null, smallSample: false }] });
+  assert.equal(noneClosed.rows[0].passRateText, '—');
+  assert.equal(noneClosed.rows[0].runningText, '7개');
+  assert.equal(noneClosed.generatedAtText, null);
+
+  assert.deepEqual(publicStatsView(undefined), { generatedAtText: null, rows: [], shown: 0 });
 });
 
 test('return percent uses integer basis points with a sign', () => {

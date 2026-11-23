@@ -6,9 +6,8 @@
 // finished only when the server hands back the account it opened in the same
 // transaction. Anything else is "확인 중" or "취소됨" — never "결제 완료".
 
+import { formatKrw } from './format.js';
 import { PAID_NOTICE } from '../site/view.js';
-
-const MINUS = '−';
 
 const SLOT_PREFIX = 'oh-my-prop.checkout.';
 const KEY_SHAPE = /^[A-Za-z0-9_-]{8,64}$/; // backend/src/money/payments.js:27
@@ -17,14 +16,6 @@ export const CHECKING_TEXT = '결제가 취소됐는지 확인 중입니다. 결
 export const NO_PAYMENT_METHOD = '결제 수단 연결 전 — 결제 창을 띄울 수 없습니다. 주문서만 만들어진 상태입니다.';
 export const DEV_PAY_NOTICE = '개발 환경 모의 결제입니다. 실제 결제 수단이 아니고 돈이 움직이지 않습니다.';
 export const FEATURE_OFF_TEXT = PAID_NOTICE; // 홈·규칙 화면과 같은 문구를 쓴다.
-
-// 원화는 소수점이 없다. 정수 그룹만 찍는다(가상 USD 표기와 섞이지 않게 "원"을 붙인다).
-export function formatKrw(amountKrw) {
-  const value = BigInt(amountKrw ?? 0);
-  const negative = value < 0n;
-  const digits = (negative ? -value : value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  return `${negative ? MINUS : ''}${digits}원`;
-}
 
 // Order states of backend/src/money/payments.js:6-11. `pending` means the outcome is
 // still moving on the server, so the screen keeps polling instead of concluding.

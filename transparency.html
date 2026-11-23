@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1412">
+  <meta name="description" content="Oh My Prop 상품별 계정 결과 통계. 통과·위반·만료 건수와 통과율을 서버 집계 그대로 공개하고, 표본이 적으면 수치를 내보내지 않습니다.">
+  <title>공개 통계 | Oh My Prop</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script src="./src/ui/theme-init.js"></script>
+  <link rel="stylesheet" href="./src/ui/tokens.css">
+  <link rel="stylesheet" href="./src/site/site.css">
+  <link rel="stylesheet" href="./src/site/nav.css">
+  <script type="module" src="./src/site/nav.js"></script>
+  <script type="module" src="./src/site/transparency.js"></script>
+</head>
+<body data-page="transparency">
+  <p class="sim-notice" role="note"><span aria-hidden="true">⚠</span> 시뮬레이션 계정 — 실제 시장에 주문이 전달되지 않습니다</p>
+  <div id="site-header"></div>
+
+  <main id="main" class="page">
+    <header class="page-head">
+      <p class="overline">Transparency</p>
+      <h1>공개 통계</h1>
+      <p>상품별로 계정이 몇 개 열렸고, 그중 몇 개가 통과·위반·만료로 끝났는지를 서버 집계 그대로 보여 줍니다. 평가 서비스의 수익은 평가 수수료에서 나옵니다. 통과율이 낮다면 그 사실도 같이 보이는 것이 맞다고 보고 이 화면을 둡니다.</p>
+    </header>
+
+    <div id="stats-body" aria-live="polite"><p class="status-msg" role="status">통계를 불러오는 중입니다…</p></div>
+
+    <section class="section" aria-labelledby="method-title">
+      <h2 id="method-title">이 수치를 어떻게 읽나요</h2>
+      <ul class="rule-list">
+        <li><strong>무엇을 세나요</strong><span>상품·규칙 버전별로 열린 계정을 셉니다. <em>거래 시작</em>은 체결이 한 건 이상 있는 계정, <em>진행 중</em>은 아직 끝나지 않은 계정입니다. <em>통과</em>·<em>위반 종료</em>·<em>기간 만료</em>는 끝난 계정의 종료 사유입니다.</span></li>
+        <li><strong>통과율</strong><span>통과 ÷ (통과 + 위반 종료 + 기간 만료). 끝난 계정이 하나도 없으면 분모가 0이므로 비율을 쓰지 않고 "—"로 둡니다.</span></li>
+        <li><strong>표본이 적으면 공개하지 않습니다</strong><span>계정이 5개 미만인 상품은 특정 개인의 결과가 드러날 수 있어 수치를 내보내지 않고 "아직 공개할 표본이 없습니다"라고 적습니다. 0건과 비공개는 다른 사실이므로 0으로 바꿔 그리지 않습니다.</span></li>
+        <li><strong>무엇이 들어 있지 않나요</strong><span>사용자·계정 식별자, 이메일, 개별 거래 내역은 이 집계에 들어가지 않습니다. 순위표에도 서버가 만든 익명 번호만 올라갑니다.</span></li>
+        <li><strong>집계 시각</strong><span>표의 수치는 서버가 최대 1분 주기로 계산한 값입니다. 실시간 값이 필요하면 <a href="/leaderboard.html">시즌 순위표</a>를 보세요.</span></li>
+      </ul>
+      <p class="small muted section-foot">아직 공개하지 않는 것: 지급 전환율과 평균 지급 처리 기간입니다. 보상 지급을 시작하지 않았으므로 셀 것이 없습니다(<a href="/faq.html#reward">보상 관련 FAQ</a>). 지급이 열리면 같은 화면에 추가합니다.</p>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+</body>
+</html>

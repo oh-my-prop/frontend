@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0d1412">
-  <meta name="description" content="가상 잔고로 프랍 트레이딩 평가 규칙을 지키는 연습을 하는 시뮬레이션 서비스. 무료 시즌 챌린지 베타.">
-  <title>Oh My Prop — 규칙을 지키는 트레이딩 연습 (시뮬레이션)</title>
+  <meta name="description" content="규칙이 투명하고, 한도에 닿기 전에 알려 주는 한국어 프랍 평가 서비스. 모든 계정은 가상 잔고의 시뮬레이션 계정입니다.">
+  <title>Oh My Prop — 규칙이 투명한 한국어 프랍 평가 (시뮬레이션)</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <script src="./src/ui/theme-init.js"></script>
   <link rel="stylesheet" href="./src/ui/tokens.css">
@@ -21,11 +21,12 @@
   <main id="main" class="page">
     <section class="hero" aria-labelledby="hero-title">
       <div>
-        <p class="overline">Free season challenge · Beta</p>
-        <h1 id="hero-title">돈을 걸지 않고,<br>규칙을 지키는 트레이딩을 연습하세요</h1>
-        <p class="lead">프랍 트레이딩 평가는 "하루에 얼마 이상 잃지 말 것" 같은 손실 한도를 지키면서 거래하는지를 봅니다. Oh My Prop은 그 평가를 <strong>가상 잔고의 시뮬레이션 계정</strong>으로 체험하게 해 줍니다. 규칙은 공개된 명세 그대로 적용되고, 모든 판정에는 근거가 함께 표시됩니다.</p>
+        <p class="overline">Korean prop evaluation · Simulation</p>
+        <h1 id="hero-title">규칙이 투명하고,<br>한도에 닿기 전에 알려 주는<br>한국어 프랍 평가</h1>
+        <p class="lead">프랍 평가는 "하루에 얼마 이상 잃지 말 것" 같은 손실 한도를 지키면서 목표를 채우는지를 봅니다. Oh My Prop은 그 평가를 <strong>가상 잔고의 시뮬레이션 계정</strong>으로 운영합니다. 화면에 보이는 한도선과 서버의 판정은 같은 규칙 명세(JSON)와 같은 센트 연산에서 나오고, 모든 판정에는 기준값·관측값·시각·근거 이벤트가 붙습니다.</p>
         <div class="btn-row">
           <a class="btn primary" href="/trader.html">무료 시즌 참가하기</a>
+          <a class="btn ghost" href="#programs-title">상품과 가격 보기</a>
           <a class="btn ghost" href="/academy/">아카데미에서 먼저 배우기</a>
         </div>
       </div>
@@ -39,17 +40,19 @@
           <li><span aria-hidden="true">✓</span><span>종목·방향·시점을 추천하지 않습니다. 화면은 내가 정한 포지션이 규칙에 미치는 영향만 계산합니다.</span></li>
           <li><span aria-hidden="true">✓</span><span>계정을 열 때 동의한 규칙 버전은 그 계정이 끝날 때까지 바뀌지 않습니다.</span></li>
         </ul>
+        <p class="small"><a href="/faq.html">자주 묻는 질문에서 더 보기 →</a></p>
       </div>
       </aside>
     </section>
 
     <section class="section" aria-labelledby="how-title">
       <p class="overline">How it works</p>
-      <h2 id="how-title">참가 방법</h2>
+      <h2 id="how-title">어떻게 동작하나요</h2>
+      <p class="lead-sm">세 단계 모두 실제 화면 요소로 이어집니다. 설명과 판정이 어긋날 자리를 만들지 않는 것이 이 서비스의 설계 목표입니다.</p>
       <ol class="steps">
-        <li><span>1</span><div><strong>규칙 읽기</strong><p>상품별 손실 한도와 목표를 규칙 설명 페이지에서 확인합니다.</p></div></li>
-        <li><span>2</span><div><strong>계정 열기</strong><p>트레이더 화면에서 가입 후, 규칙 버전에 동의하면 시즌 계정이 열립니다.</p></div></li>
-        <li><span>3</span><div><strong>한도 안에서 거래</strong><p>한도까지 남은 금액을 실시간으로 보며 거래합니다. 한도에 닿으면 계정이 종료됩니다.</p></div></li>
+        <li><span>1</span><div><strong>규칙을 확인하고 버전에 동의</strong><p>상품마다 손실 한도·목표·최소 거래일이 규칙 명세에서 문장으로 생성됩니다. 계정을 열 때 동의하는 <strong>버전 해시(SHA-256)</strong>가 그대로 서버 판정에 쓰입니다.</p><p class="step-link"><a href="/rules.html">규칙 전문과 버전 해시 보기</a></p></div></li>
+        <li><span>2</span><div><strong>한도 카드를 보며 거래</strong><p>대시보드의 <strong>손실 한도 카드</strong>가 일일·최대 한도까지 남은 금액을 실시간으로 보여 주고, 잔여가 50 · 25 · 10%가 되면 단계별로 경고합니다. 손절가를 넣으면 체결 시 잔여가 얼마가 되는지 수수료·슬리피지까지 포함해 미리 계산합니다.</p><p class="step-link"><a href="/academy/">아카데미에서 한도 계산 연습하기</a></p></div></li>
+        <li><span>3</span><div><strong>판정은 근거와 함께</strong><p>위반·통과 판정에는 <strong>어떤 규칙의 어떤 기준값을, 어떤 관측값이, 언제, 어떤 이벤트로</strong> 넘었는지가 함께 표시됩니다. 납득되지 않으면 그 판정에 이의를 제기할 수 있습니다.</p><p class="step-link"><a href="/faq.html#verdict">이의 제기 절차 보기</a></p></div></li>
       </ol>
     </section>
 
@@ -63,20 +66,33 @@
     <section class="section" aria-labelledby="programs-title">
       <p class="overline">Programs</p>
       <h2 id="programs-title">상품 비교</h2>
-      <p class="lead-sm">각 상품의 규칙은 규칙 명세(JSON)에서 그대로 생성됩니다. 유료 평가는 법률 검토가 끝나기 전까지 열리지 않습니다.</p>
-      <div id="program-list" class="card-grid" aria-live="polite"><p class="status-msg" role="status">상품 정보를 불러오는 중입니다…</p></div>
+      <p class="lead-sm">아래 표는 서버가 주는 상품 목록 그대로입니다. 각 상품의 규칙은 규칙 명세(JSON)에서 생성되고, <strong>가격은 판매가 열린 상품에만</strong> 표시됩니다. 유료 평가는 법률 검토를 마치기 전까지 "준비 중"으로만 보입니다.</p>
+      <div id="program-list" aria-live="polite"><p class="status-msg" role="status">상품 정보를 불러오는 중입니다…</p></div>
     </section>
 
     <section class="section" aria-labelledby="principles-title">
-      <p class="overline">Transparency</p>
-      <h2 id="principles-title">운영 원칙</h2>
+      <p class="overline">Why trust this</p>
+      <h2 id="principles-title">믿을 근거</h2>
+      <p class="lead-sm">약속이 아니라 확인할 수 있는 것만 적었습니다. 각 항목은 확인할 화면으로 이어집니다.</p>
       <div class="principles">
-        <article><h3>규칙은 버전으로 고정</h3><p>새 규칙 버전은 출시 14일 전에 공지하고, 이미 열린 계정에는 소급하지 않습니다. 규칙 페이지에서 버전 해시를 확인할 수 있습니다.</p></article>
-        <article><h3>판정 근거 공개</h3><p>위반·통과 판정마다 기준값, 관측값, 시각, 근거 이벤트를 보여 줍니다. 판정에 이의를 제기할 수 있습니다.</p></article>
-        <article><h3>사람이 검토하는 부정거래 심사</h3><p>자동 신호는 계정을 검토 대기열에 올릴 뿐이며, 제재는 담당자 검토 후에만 이뤄집니다.</p></article>
-        <article><h3>학습 도구는 무료</h3><p>아카데미의 손실 한도 계산기와 연습장은 로그인 없이 계속 무료로 쓸 수 있습니다.</p></article>
+        <article><h3>규칙은 버전으로 고정</h3><p>새 규칙 버전은 출시 14일 전에 공지하고, 이미 열린 계정에는 소급하지 않습니다. 계정이 동의한 버전 해시를 규칙 페이지에서 그대로 확인할 수 있습니다.</p><p class="small"><a href="/rules.html">규칙과 버전 해시</a></p></article>
+        <article><h3>판정 근거 공개</h3><p>위반·통과 판정마다 기준값, 관측값, 시각, 근거 이벤트를 보여 줍니다. 판정에 이의를 제기할 수 있고, 처리 상태를 화면에서 따라갈 수 있습니다.</p><p class="small"><a href="/faq.html#verdict">이의 제기</a></p></article>
+        <article><h3>결과 통계 공개</h3><p>상품별 계정 수·통과·위반·만료 건수와 통과율을 공개합니다. 표본이 적어 개인이 드러날 수 있으면 수치를 내보내지 않고 그 사실을 적습니다.</p><p class="small"><a href="/transparency.html">공개 통계</a></p></article>
+        <article><h3>사람이 검토하는 부정거래 심사</h3><p>자동 신호는 계정을 검토 대기열에 올릴 뿐이며, 제재는 담당자 검토 후에만 이뤄집니다. 판단 기준이 바뀌면 버전을 기록하고 공지합니다.</p><p class="small"><a href="/legal/terms.html#a8">약관 제8조</a></p></article>
+        <article><h3>순위는 익명, 보상은 없음</h3><p>무료 시즌 순위표에는 서버가 만든 익명 번호만 올라갑니다. 현금·경품·포인트 어느 것도 걸려 있지 않습니다.</p><p class="small"><a href="/leaderboard.html">순위표</a></p></article>
+        <article><h3>학습 도구는 무료</h3><p>아카데미의 손실 한도 계산기와 가상 거래 연습장은 로그인 없이 계속 무료로 쓸 수 있습니다.</p><p class="small"><a href="/academy/">아카데미</a></p></article>
       </div>
-      <p class="small muted section-foot">자세한 내용은 <a href="/legal/terms.html">이용약관(초안)</a>과 <a href="/legal/privacy.html">개인정보 처리방침(초안)</a>을 확인하세요.</p>
+      <p class="small muted section-foot">자세한 내용은 <a href="/legal/terms.html">이용약관(초안)</a>과 <a href="/legal/privacy.html">개인정보 처리방침(초안)</a>을 확인하세요. 두 문서는 법률 검토 전 초안이며 [확정 필요] 항목이 남아 있습니다.</p>
+    </section>
+
+    <section class="section" aria-labelledby="start-title">
+      <p class="overline">Start now</p>
+      <h2 id="start-title">지금 할 수 있는 일</h2>
+      <ul class="next-steps">
+        <li><strong>무료 시즌에 참가한다</strong><span>가입 → 규칙 버전 동의 → 시즌 계정 발급까지 한 화면에서 끝납니다. 결제 정보는 필요 없습니다.</span><a class="btn primary" href="/trader.html">무료 시즌 참가하기</a></li>
+        <li><strong>규칙부터 읽는다</strong><span>어떤 한도가 언제 걸리는지 숫자와 산식으로 확인한 뒤 결정해도 늦지 않습니다.</span><a class="btn ghost" href="/rules.html">규칙 전문 보기</a></li>
+        <li><strong>남들의 결과를 본다</strong><span>지금까지의 통과·위반 분포와 시즌 순위를 보고 판단하세요.</span><a class="btn ghost" href="/transparency.html">공개 통계 보기</a></li>
+      </ul>
     </section>
   </main>
 

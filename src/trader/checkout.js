@@ -14,8 +14,9 @@ import * as api from './api.js';
 import { el } from '../site/dom.js';
 import { rulesDocument } from '../site/view.js';
 import { programName } from './view.js';
+import { formatKrw } from './format.js';
 import {
-  FEATURE_OFF_TEXT, confirmOutcome, endPurchase, formatKrw, hasPendingOrder,
+  FEATURE_OFF_TEXT, confirmOutcome, endPurchase, hasPendingOrder,
   orderRow, orderStatusView, payStep, purchaseSlot, rememberOrder, startPurchase,
 } from './checkout-view.js';
 import { ensureIdentity, identityGateNow, openIdentity, refreshIdentity } from './identity.js';

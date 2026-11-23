@@ -272,6 +272,46 @@ input:disabled, select:disabled { opacity: .55; }
 .activity time { white-space: nowrap; }
 .review-trades li.muted { display: block; }
 
+/* ---- checkout (유료 평가 구매) ---- */
+.sidebar .link-btn { margin-top: 12px; padding-left: 6px; font-size: .8rem; }
+.buy-panel { display: grid; gap: 12px; }
+.buy-panel .facts { margin: 4px 0; }
+.buy-panel .link-btn { justify-self: start; }
+.sha { font-family: var(--font-mono); font-size: .76rem; word-break: break-all; }
+/* 원화는 가상 USD와 다른 돈이다. 색과 기호로 분명히 떼어 놓는다. */
+.krw { font-size: 1.25rem; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+.krw::before { content: '결제 '; font-size: .7rem; font-weight: 700; color: var(--brand); letter-spacing: .08em; vertical-align: 2px; margin-right: 4px; }
+.policy { padding: 12px 14px; border: 1px solid var(--line); border-left: 3px solid var(--warn); border-radius: 9px; background: var(--surface-2); }
+.policy h3 { font-size: .9rem; margin-bottom: 8px; }
+.policy .rule-list span { color: var(--text-2); }
+.accept-row { display: grid; gap: 2px; }
+.accept-row .field-help { margin-left: 25px; margin-top: 0; }
+.pay-panel { display: grid; gap: 12px; margin-bottom: 18px; }
+.pay-panel:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+/* 주문 번호는 길다. 좁은 화면에서 가로로 넘치지 않게 줄바꿈을 허용한다. */
+.pay-panel .facts { grid-template-columns: max-content minmax(0, 1fr); }
+.pay-panel .facts code { font-family: var(--font-mono); font-size: .8rem; word-break: break-all; }
+.pay-note { padding: 11px 13px; border-radius: 8px; background: var(--surface-2); font-size: .86rem; line-height: 1.6; }
+.pay-note[data-kind="unavailable"] { background: var(--warn-bg); color: var(--warn); font-weight: 600; }
+.pay-note[data-kind="checking"] { background: var(--info-bg); color: var(--info); font-weight: 600; }
+.pay-note[data-kind="opened"] { background: var(--buy-bg); color: var(--buy-text); font-weight: 600; }
+.dev-pay { display: grid; gap: 8px; padding: 13px 14px; border: 1px dashed var(--line-strong); border-radius: 9px; background: var(--surface-2); }
+.dev-pay .primary-btn { justify-self: start; width: auto; }
+.dev-pay-tag { font-size: .7rem; font-weight: 800; letter-spacing: .12em; color: var(--warn); text-transform: uppercase; }
+.soon-panel { display: grid; gap: 8px; }
+.status-pill[data-tone="wait"] { background: var(--warn-bg); color: var(--warn); }
+.status-pill[data-tone="bad"] { background: var(--sell-bg); color: var(--sell-text); }
+.status-pill[data-tone="info"] { background: var(--info-bg); color: var(--info); }
+.order-card { display: grid; gap: 6px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.order-card:last-child { border-bottom: 0; padding-bottom: 0; }
+.order-card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.order-id { font-family: var(--font-mono); font-size: .74rem; color: var(--muted); word-break: break-all; }
+.order-card-body { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.order-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.refund-ask { display: grid; gap: 10px; padding: 12px 14px; border-radius: 9px; background: var(--sell-bg); color: var(--sell-text); font-size: .86rem; font-weight: 600; }
+.refund-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.refund-actions .primary-btn { width: auto; }
+
 /* ---- responsive ---- */
 @media (max-width: 1100px) {
   .trade-grid { grid-template-columns: 1fr; }
@@ -280,8 +320,9 @@ input:disabled, select:disabled { opacity: .55; }
 @media (max-width: 860px) {
   .welcome { grid-template-columns: 1fr; padding: 36px 18px; gap: 28px; }
   .auth-card { position: static; }
-  .app { grid-template-columns: 1fr; }
-  .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
+  /* 한 칸짜리 격자에서도 줄어들 수 있어야 계정이 여러 개일 때 가로로 넘치지 않는다. */
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .sidebar { border-right: 0; border-bottom: 1px solid var(--line); min-width: 0; }
   .account-list { grid-auto-flow: column; grid-auto-columns: minmax(220px, 1fr); overflow-x: auto; }
   .main { padding: 20px 16px 48px; }
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }

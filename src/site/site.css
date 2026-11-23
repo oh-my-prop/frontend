@@ -10,6 +10,8 @@ h1, h2, h3, h4, p { margin: 0; }
 button, select { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 [hidden] { display: none !important; }
+/* 머리말과 시뮬레이션 고지가 sticky라서, 앵커로 이동하면 제목이 그 아래에 가린다. */
+main [id] { scroll-margin-top: 90px; }
 code { font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; font-size: .85em; padding: 1px 6px; border-radius: 6px; background: var(--surface-2); word-break: break-all; }
 
 .page { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
@@ -132,6 +134,40 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .doc .pending { color: var(--warn); font-weight: 700; }
 .doc .table-wrap { overflow-x: auto; }
 .doc table { min-width: 0; }
+
+/* Program comparison table (home). On narrow screens each row becomes a block
+   with the column name in front of the value, so nothing scrolls sideways. */
+.block { display: block; }
+.program-table th[scope="row"] { display: grid; gap: 6px; justify-items: start; min-width: 220px; vertical-align: top; }
+.program-table td { vertical-align: top; }
+.program-table .row-name { font-size: 1.05rem; }
+/* 금액은 줄 가운데서 끊지 않는다(body의 overflow-wrap: anywhere가 "190,0 / 00원"을 만든다). */
+.program-table .balance { font-size: .98rem; white-space: nowrap; }
+.program-table .price-cell strong { font-size: 1.1rem; white-space: nowrap; }
+.program-table .chips { margin: 0; }
+.program-table .card-status { margin: 0; }
+.small-btn { min-height: 40px; padding: 9px 16px; font-size: .9rem; }
+.card-status.sale { color: var(--brand); }
+.empty-cell strong { font-weight: 700; }
+.step-link { margin-top: 8px; font-size: .88rem; font-weight: 700; }
+.doc-ref { margin-top: 10px; font-size: .88rem; color: var(--muted); }
+
+/* "지금 할 수 있는 일" list */
+.next-steps { list-style: none; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 14px; }
+.next-steps li { display: grid; gap: 8px; align-content: start; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow-1); }
+.next-steps strong { font-size: 1.05rem; }
+.next-steps span { color: var(--muted); font-size: .9rem; }
+.next-steps .btn { justify-self: start; }
+
+@media (max-width: 720px) {
+  .program-table, .program-table caption, .program-table thead, .program-table tbody, .program-table tr, .program-table th, .program-table td { display: block; width: 100%; }
+  .program-table thead { display: none; }
+  .program-table tr { padding: 6px 0 14px; border-bottom: 1px solid var(--line); }
+  .program-table tbody tr:last-child { border-bottom: 0; }
+  .program-table th, .program-table td { border-bottom: 0; }
+  .program-table td::before { content: attr(data-label); display: block; margin-bottom: 4px; color: var(--muted); font-size: .74rem; font-weight: 700; letter-spacing: .04em; }
+  .program-table th[scope="row"] { min-width: 0; }
+}
 
 @media (max-width: 860px) {
   .hero { grid-template-columns: 1fr; padding-top: 40px; }

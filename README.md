@@ -8,13 +8,15 @@
 
 | 경로 | 내용 |
 | --- | --- |
-| `/` (`index.html`) | 서비스 소개, 시뮬레이션 고지, 현재 무료 시즌 요약, 상품 비교 카드. 유료 평가는 "준비 중 — 유료 평가는 법률 검토 후 제공"만 표시하고 가격·보상 문구는 넣지 않습니다. |
+| `/` (`index.html`) | 서비스 소개(무엇인지 → 어떻게 동작하는지 → 믿을 근거 → 지금 할 수 있는 일), 시뮬레이션 고지, 현재 무료 시즌 요약, **상품 비교 표**. 표는 `GET /api/v2/programs` 응답으로만 그립니다: `saleState`가 `for_sale`이면 서버가 준 `priceKrw`와 구매 CTA, `preparing`이면 "준비 중 — 유료 평가는 법률 검토 후 제공", `free`면 참가 CTA. **가격 숫자는 화면 코드에 없습니다.** |
 | `/academy/`, `/academy/journal.html` | 기존 학습 도구(계산기·리셋 비교, 가상 거래 연습장). `/journal.html`은 새 위치로 넘겨 주는 안내 페이지입니다. |
 | `/leaderboard.html` | 무료 시즌 순위표. 익명 번호, 수익률(베이시스 포인트를 정수 연산으로 % 변환), 상태 배지(기호+글자). |
+| `/faq.html` | 사는 사람이 실제로 묻는 것(실제 돈·시뮬레이션, 규칙 변경과 버전 해시, 이의 제기, 가격·결제, 청약 철회 조건, 보상, 본인확인과 개인정보, 통계, 문의). 정해지지 않은 것은 `[확정 필요]`로 두고 약속하지 않습니다. |
+| `/transparency.html` | `GET /api/v2/stats/public`을 그대로 그리는 공개 통계(전략 03 §4.3). 표본이 적어 서버가 수치를 null로 보내면 "아직 공개할 표본이 없습니다"와 이유만 적고 숫자를 만들지 않습니다. |
 | `/rules.html?program=<코드>&version=<n>` | 규칙 명세에서 `describeRule`로 생성한 규칙 전문과 버전 해시. 인자가 없으면 상품 목록. |
 | `/legal/terms.html`, `/legal/privacy.html` | G0용 이용약관·개인정보 처리방침 **초안**(법률 검토 전, [확정 필요] 항목 포함). |
 
-- 공개 읽기 API(`/api/v2/programs`, `.../versions/{v}`, `.../leaderboard`)만 씁니다. 서버에 연결할 수 없으면(정적 파일로 열었을 때 등) 각 영역에 안내 문구를 표시합니다.
+- 공개 읽기 API(`/api/v2/programs`, `.../versions/{v}`, `.../leaderboard`, `/api/v2/stats/public`)만 씁니다. 서버에 연결할 수 없으면(정적 파일로 열었을 때 등) 각 영역에 안내 문구를 표시합니다.
 - 공용 머리말·꼬리말은 `src/site/nav.js`가 `#site-header`/`#site-footer` 자리에 그립니다. 스타일은 `src/site/site.css`(다크 테마), `src/site/nav.css`(머리말·꼬리말 전용).
 - CSP(`default-src 'self'`)에 맞춰 인라인 스크립트·스타일 없이 모듈 파일과 `textContent`만 씁니다.
 - 금지 표현("보장", "원금", "투자 자문" 등)은 `src/site/banned-phrases.js`에 있고, `test/banned-phrases.test.mjs`가 모든 HTML과 `src/**/*.js`를 검사합니다. 예외는 법률 문서의 부정문만 파일+문장 단위로 `ALLOWLIST`에 적습니다.

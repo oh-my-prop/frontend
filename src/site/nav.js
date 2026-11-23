@@ -9,17 +9,23 @@ import { el } from './dom.js';
 
 export const NAV_LINKS = [
   { id: 'home', href: '/', text: '홈' },
+  { id: 'rules', href: '/rules.html', text: '규칙' },
+  { id: 'transparency', href: '/transparency.html', text: '공개 통계' },
+  { id: 'leaderboard', href: '/leaderboard.html', text: '순위표' },
+  { id: 'faq', href: '/faq.html', text: '자주 묻는 질문' },
   { id: 'academy', href: '/academy/', text: '아카데미' },
   { id: 'journal', href: '/academy/journal.html', text: '연습장' },
-  { id: 'leaderboard', href: '/leaderboard.html', text: '순위표' },
-  { id: 'rules', href: '/rules.html', text: '규칙' },
 ];
 
 export const CTA_LINK = { id: 'trader', href: '/trader.html', text: '트레이더 화면' };
 
+// 꼬리말은 "무엇을 약속했는가(약관·방침)"와 "막히면 어디로 가는가(문의·FAQ)"만 둔다.
 export const FOOTER_LINKS = [
   { id: 'terms', href: '/legal/terms.html', text: '이용약관(초안)' },
   { id: 'privacy', href: '/legal/privacy.html', text: '개인정보 처리방침(초안)' },
+  { id: 'faq', href: '/faq.html', text: '자주 묻는 질문' },
+  { id: 'contact', href: '/faq.html#contact', text: '문의' },
+  { id: 'transparency', href: '/transparency.html', text: '공개 통계' },
   { id: 'rules', href: '/rules.html', text: '상품 규칙' },
   { id: 'academy', href: '/academy/', text: '아카데미' },
 ];

@@ -3,8 +3,8 @@
 // DOM built with createElement/textContent only (CSP: no inline script/style).
 
 import { describeEvent } from '../trader/view.js';
-import { formatCents, formatTimestamp } from '../trader/format.js';
-import { formatKrw, orderStatusView } from '../trader/checkout-view.js';
+import { formatCents, formatKrw, formatTimestamp } from '../trader/format.js';
+import { orderStatusView } from '../trader/checkout-view.js';
 import { ORDER_STATUS_FILTERS, ledgerRows, moneyAlerts, moneyOrderRow, reserveView } from './money-view.js';
 import { mountThemeToggle } from '../ui/theme.js';
 

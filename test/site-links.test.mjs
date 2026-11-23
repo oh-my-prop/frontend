@@ -44,7 +44,7 @@ function references(html) {
 }
 
 test('there are pages to check', () => {
-  for (const page of ['index.html', 'academy/index.html', 'academy/journal.html', 'journal.html', 'leaderboard.html', 'rules.html', 'legal/terms.html', 'legal/privacy.html', 'trader.html']) {
+  for (const page of ['index.html', 'faq.html', 'transparency.html', 'academy/index.html', 'academy/journal.html', 'journal.html', 'leaderboard.html', 'rules.html', 'legal/terms.html', 'legal/privacy.html', 'trader.html']) {
     assert.ok(htmlFiles.includes(page), `${page} exists`);
   }
 });
@@ -101,7 +101,7 @@ test('pages follow the CSP: file-based module scripts, no inline script/style/ha
 });
 
 test('public pages share the site header and footer', () => {
-  for (const file of ['index.html', 'academy/index.html', 'academy/journal.html', 'leaderboard.html', 'rules.html', 'legal/terms.html', 'legal/privacy.html']) {
+  for (const file of ['index.html', 'faq.html', 'transparency.html', 'academy/index.html', 'academy/journal.html', 'leaderboard.html', 'rules.html', 'legal/terms.html', 'legal/privacy.html']) {
     const html = read(file);
     assert.match(html, /id="site-header"/, `${file} header placeholder`);
     assert.match(html, /id="site-footer"/, `${file} footer placeholder`);
@@ -112,7 +112,7 @@ test('public pages share the site header and footer', () => {
 });
 
 test('pages with accounts or rules show the fixed simulation notice', () => {
-  for (const file of ['index.html', 'leaderboard.html', 'rules.html']) {
+  for (const file of ['index.html', 'faq.html', 'transparency.html', 'leaderboard.html', 'rules.html']) {
     assert.ok(read(file).includes('시뮬레이션 계정 — 실제 시장에 주문이 전달되지 않습니다'), file);
   }
   for (const file of ['legal/terms.html', 'legal/privacy.html']) {

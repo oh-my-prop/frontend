@@ -16,6 +16,13 @@ export function formatCents(cents) {
   return `${negative ? MINUS : ''}$${dollars}.${rest}`;
 }
 
+// 원화는 소수점이 없다. 정수 그룹만 찍는다(가상 USD 표기와 섞이지 않게 '원'을 붙인다).
+export function formatKrw(amountKrw) {
+  const value = BigInt(amountKrw ?? 0);
+  const negative = value < 0n;
+  return `${negative ? MINUS : ''}${groupThousands((negative ? -value : value).toString())}원`;
+}
+
 export function formatSignedCents(cents) {
   const value = BigInt(cents);
   if (value > 0n) return `+${formatCents(value)}`;

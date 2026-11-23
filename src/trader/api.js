@@ -49,6 +49,8 @@ export const createAppeal = (id, eventSeq, reason) => request('POST', `/api/v2/a
 export const listPrograms = () => request('GET', '/api/v2/programs');
 export const getProgram = (code, version) => request('GET', `/api/v2/programs/${encodeURIComponent(code)}/versions/${version}`);
 export const getLeaderboard = (code, version) => request('GET', `/api/v2/programs/${encodeURIComponent(code)}/versions/${version}/leaderboard`);
+// 공개 통계(인증 불필요). 사용자·계정 식별자가 없는 상품별 집계만 돌아온다.
+export const getPublicStats = () => request('GET', '/api/v2/stats/public');
 export const listAccounts = () => request('GET', '/api/v2/accounts');
 export const getAccount = (id) => request('GET', `/api/v2/accounts/${id}`);
 export const getEvents = (id, after = 0) => request('GET', `/api/v2/accounts/${id}/events?after=${after}&limit=1000`);

@@ -27,7 +27,7 @@ const files = walk(ROOT).filter((file) => file.endsWith('.html') || (file.starts
 const allowedFor = (file) => ALLOWLIST.filter((entry) => entry.file === file).map((entry) => entry.text);
 
 test('scan covers every page and UI module', () => {
-  for (const expected of ['index.html', 'academy/index.html', 'academy/journal.html', 'leaderboard.html', 'rules.html', 'legal/terms.html', 'legal/privacy.html', 'trader.html', 'src/trader/view.js', 'src/site/view.js']) {
+  for (const expected of ['index.html', 'faq.html', 'transparency.html', 'academy/index.html', 'academy/journal.html', 'leaderboard.html', 'rules.html', 'legal/terms.html', 'legal/privacy.html', 'trader.html', 'src/trader/view.js', 'src/site/view.js']) {
     assert.ok(files.includes(expected), `${expected} is scanned`);
   }
 });

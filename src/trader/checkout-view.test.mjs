@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { formatKrw } from './format.js';
 import {
-  confirmOutcome, endPurchase, formatKrw, hasPendingOrder, orderRow, payStep,
+  confirmOutcome, endPurchase, hasPendingOrder, orderRow, payStep,
   purchaseSlot, refundState, rememberOrder, startPurchase,
 } from './checkout-view.js';
 const fakeStore = () => {

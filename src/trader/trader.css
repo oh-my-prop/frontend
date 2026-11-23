@@ -312,6 +312,23 @@ input:disabled, select:disabled { opacity: .55; }
 .refund-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .refund-actions .primary-btn { width: auto; }
 
+/* ---- 본인확인 (결제 앞단계) ---- */
+.identity-panel { display: grid; gap: 12px; }
+.identity-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.identity-panel .how-steps { margin: 0; }
+.identity-panel .primary-btn, .identity-panel .ghost-btn { justify-self: start; width: auto; }
+.identity-form { display: grid; }
+.identity-form .primary-btn { margin-top: 14px; justify-self: start; width: auto; }
+/* 좁은 화면에서 입력칸이 칸 밖으로 나가지 않게 한다(390px 기준). */
+.identity-form input { width: 100%; max-width: 320px; }
+.identity-failure { border-left: 3px solid var(--sell); }
+.identity-failure[data-kind="already_verified"] { border-left-color: var(--info); }
+.identity-failure h2 { font-size: 1.05rem; }
+.identity-step { display: grid; gap: 8px; padding: 13px 14px; border: 1px solid var(--line); border-left: 3px solid var(--brand); border-radius: 9px; background: var(--surface-2); font-size: .88rem; }
+.identity-step-tag { font-size: .7rem; font-weight: 800; letter-spacing: .1em; color: var(--brand); }
+.identity-step .primary-btn { justify-self: start; width: auto; }
+#checkout-message .ghost-btn { margin-left: 10px; }
+
 /* ---- responsive ---- */
 @media (max-width: 1100px) {
   .trade-grid { grid-template-columns: 1fr; }

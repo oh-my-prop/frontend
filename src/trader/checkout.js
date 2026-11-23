@@ -18,6 +18,8 @@ import {
   FEATURE_OFF_TEXT, confirmOutcome, endPurchase, formatKrw, hasPendingOrder,
   orderRow, orderStatusView, payStep, purchaseSlot, rememberOrder, startPurchase,
 } from './checkout-view.js';
+import { ensureIdentity, identityGateNow, openIdentity, refreshIdentity } from './identity.js';
+import { identityBlock } from './identity-view.js';
 
 const $ = (id) => document.getElementById(id);
 const POLL_MS = 2000;
@@ -41,6 +43,7 @@ const state = {
   busy: false,
   message: null, // { tone, text }
   refundAsk: null, // 철회 확인을 기다리는 주문 id
+  identityAsk: null, // 본인확인 때문에 막혔을 때 띄우는 안내와 버튼
   poll: null,
   polls: 0,
 };
@@ -85,6 +88,7 @@ export async function openCheckout(program, spec) {
   state.doc = spec ? rulesDocument(spec) : null;
   state.accepted = { rules: false, refund: false };
   state.message = null;
+  state.identityAsk = null;
   state.refundAsk = null;
   state.order = null;
   syncAccounts();
@@ -97,6 +101,7 @@ async function refresh() {
   const [orders, devTools] = await Promise.all([
     api.listOrders(),
     state.devTools === null ? api.devToolsAvailable() : Promise.resolve(state.devTools),
+    ensureIdentity(), // 기능이 없는 서버에서는 조용히 '없음'으로 끝난다
   ]);
   state.devTools = devTools;
   if (orders.ok) {
@@ -171,13 +176,21 @@ async function createOrder() {
   if (!state.program || state.busy) return;
   state.busy = true;
   state.message = null;
+  state.identityAsk = null;
   render();
   const key = startPurchase(sessionStorage, productKey(state.program), api.newKey);
   const result = await api.createOrder(state.program.program, state.program.version, state.program.rulesSha256, key);
   state.busy = false;
   if (!result.ok) {
+    const block = identityBlock(result);
     if (result.code === 'feature_disabled') state.enabled = false;
-    else state.message = { tone: 'warning', text: result.message };
+    else if (block) {
+      // 본인확인 게이트다(403). 오류 문구만 띄우지 않고 그 화면으로 가는 버튼까지 둔다.
+      // 우리 쪽 상태가 낡아서 막힌 것이므로 서버 상태를 다시 읽는다.
+      state.identityAsk = block;
+      state.message = { tone: 'warning', text: block.text };
+      await refreshIdentity();
+    } else state.message = { tone: 'warning', text: result.message };
     render();
     return;
   }
@@ -251,10 +264,16 @@ async function submitRefund(orderId) {
 // ---- rendering -------------------------------------------------------------------------
 
 function render() {
+  // 안내에 "다음에 할 일" 버튼이 붙을 수 있다(본인확인으로 보내기).
   const message = $('checkout-message');
-  message.textContent = state.message?.text ?? '';
+  const parts = [];
+  if (state.message) parts.push(el('span', { text: state.message.text }));
+  if (state.identityAsk) {
+    parts.push(el('button', { class: 'ghost-btn small', type: 'button', text: state.identityAsk.action, onclick: goIdentity }));
+  }
+  message.replaceChildren(...parts);
   message.dataset.tone = state.message?.tone ?? '';
-  message.hidden = !state.message;
+  message.hidden = parts.length === 0;
 
   if (state.enabled === false) {
     $('checkout-product').replaceChildren(el('section', { class: 'panel soon-panel' },
@@ -281,6 +300,7 @@ function renderProduct() {
     return;
   }
   const doc = state.doc;
+  const gate = identityGateNow();
   const rules = el('details', { class: 'rules-more' },
     el('summary', { text: '규칙 전문 보기' }),
     ...doc.phases.map((phase) => el('div', { class: 'phase-block' },
@@ -325,11 +345,40 @@ function renderProduct() {
       el('h3', { text: '청약 철회(환불) 정책' }),
       el('ul', { class: 'rule-list' }, REFUND_POLICY.map((line) => el('li', {}, el('span', { text: line })))),
     ),
-    state.order ? null : accept('rules', '규칙 전문과 규칙 버전 해시를 확인했고 동의합니다'),
-    state.order ? null : accept('refund', '청약 철회 조건을 확인했습니다', '거래를 시작하면 철회할 수 없습니다.'),
-    state.order ? el('p', { class: 'soon', text: '이 상품의 주문이 이미 있습니다. 아래 결제 단계에서 이어서 진행하세요.' }) : start,
+    state.order || gate.blocks ? null : accept('rules', '규칙 전문과 규칙 버전 해시를 확인했고 동의합니다'),
+    state.order || gate.blocks ? null : accept('refund', '청약 철회 조건을 확인했습니다', '거래를 시작하면 철회할 수 없습니다.'),
+    gate.blocks ? identityStep() : null,
+    state.order ? el('p', { class: 'soon', text: '이 상품의 주문이 이미 있습니다. 아래 결제 단계에서 이어서 진행하세요.' }) : (gate.blocks ? null : start),
+    gate.kind === 'done' ? el('p', { class: 'muted small', text: '본인확인을 마친 계정입니다. 구매를 바로 진행할 수 있습니다.' }) : null,
     state.busy ? el('p', { class: 'muted small', text: '처리 중…' }) : null,
   ));
+}
+
+// 결제 앞단계. 서버가 주문 생성 자체를 막으므로(identity.js:94-98) 주문서 버튼
+// 대신 이 칸을 둔다. "무엇을 해야 하는지"가 버튼까지 이어져야 한다.
+function identityStep() {
+  return el('div', { class: 'identity-step' },
+    el('p', { class: 'identity-step-tag', text: '1단계 · 본인확인' }),
+    el('p', { text: '유료 평가는 만 19세 이상 본인확인을 마친 계정만 결제할 수 있습니다. 계정당 한 번만 하면 됩니다.' }),
+    el('p', { class: 'muted small', text: '저장하는 것은 연결정보(CI)의 해시뿐이고, 이름·생년월일 원문은 남기지 않습니다.' }),
+    el('button', { class: 'primary-btn', id: 'go-identity', type: 'button', text: '본인확인 하러 가기', onclick: goIdentity }),
+  );
+}
+
+function goIdentity() {
+  stopPoll();
+  openIdentity({ resume: resumeCheckout });
+}
+
+/** 본인확인 화면에서 돌아왔다. 상품과 동의 상태는 그대로 두고 다시 그린다. */
+function resumeCheckout() {
+  hooks.closeOthers();
+  $('checkout').hidden = false;
+  state.message = null;
+  state.identityAsk = null;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  refresh();
 }
 
 const canBuy = () => state.accepted.rules && state.accepted.refund && !state.busy && !state.order;

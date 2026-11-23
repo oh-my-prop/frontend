@@ -39,6 +39,12 @@ export const getMe = () => request('GET', '/api/v1/auth/me');
 export const login = (email, password) => request('POST', '/api/v1/auth/login', { body: { email, password } });
 export const register = (email, password) => request('POST', '/api/v1/auth/register', { body: { email, password } });
 export const logout = () => request('POST', '/api/v1/auth/logout');
+export const loginTotp = (challenge, code) => request('POST', '/api/v1/auth/login/totp', { body: { challenge, code } });
+export const totpSetup = () => request('POST', '/api/v1/auth/totp/setup');
+export const totpEnable = (code) => request('POST', '/api/v1/auth/totp/enable', { body: { code } });
+export const totpDisable = (code) => request('POST', '/api/v1/auth/totp/disable', { body: { code } });
+export const getAppeals = (id) => request('GET', `/api/v2/accounts/${id}/appeals`);
+export const createAppeal = (id, eventSeq, reason) => request('POST', `/api/v2/accounts/${id}/appeals`, { body: { eventSeq, reason } });
 
 export const listPrograms = () => request('GET', '/api/v2/programs');
 export const getProgram = (code, version) => request('GET', `/api/v2/programs/${encodeURIComponent(code)}/versions/${version}`);
@@ -47,6 +53,11 @@ export const listAccounts = () => request('GET', '/api/v2/accounts');
 export const getAccount = (id) => request('GET', `/api/v2/accounts/${id}`);
 export const getEvents = (id, after = 0) => request('GET', `/api/v2/accounts/${id}/events?after=${after}&limit=1000`);
 export const getQuotes = () => request('GET', '/api/v2/market/quotes');
+export function getCandles(symbol, { since, limit = 240 } = {}) {
+  const query = new URLSearchParams({ symbol, limit: String(limit) });
+  if (since) query.set('since', since);
+  return request('GET', `/api/v2/market/candles?${query}`);
+}
 
 export const openAccount = (program, version, acceptedRulesSha256) =>
   request('POST', '/api/v2/accounts', { body: { program, version, acceptedRulesSha256 } });

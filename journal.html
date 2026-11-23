@@ -3,107 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111b1a">
-  <title>가상 거래 연습장 | Oh My Prop</title>
-  <link rel="stylesheet" href="./src/journal.css">
-  <script type="module" src="./src/journal.js"></script>
+  <meta http-equiv="refresh" content="0; url=./academy/journal.html">
+  <title>연습장이 이동했습니다 | Oh My Prop</title>
+  <link rel="canonical" href="/academy/journal.html">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script src="./src/ui/theme-init.js"></script>
+  <link rel="stylesheet" href="./src/ui/tokens.css">
 </head>
 <body>
-  <div class="shell">
-    <header class="header"><a class="brand" href="./index.html">P<span>.</span> <strong>OH MY PROP</strong></a><span><a href="./trader.html">트레이더 대시보드</a> · <a href="./index.html">← 시뮬레이터로 돌아가기</a></span></header>
-    <main>
-      <section class="intro" aria-labelledby="title">
-        <p class="eyebrow">PRACTICE JOURNAL / 01</p>
-        <h1 id="title">가상 거래 <em>연습장</em></h1>
-        <p>하나의 가상 세션에서 종료된 거래를 순서대로 기록하고 고정 손실 경계까지의 거리를 살펴보세요.</p>
-        <div class="notice"><strong>시뮬레이션 전용입니다.</strong> 실제 거래, 거래 실행 또는 특정 업체의 규정 판정이 아닙니다. 시세와 수수료는 자동 반영되지 않으므로 모든 비용을 순손익에 직접 포함하세요. 미실현 손익과 일일 리셋은 계산하지 않습니다.</div>
-        <p class="privacy">세션 기록은 이 브라우저의 로컬 저장소에 저장됩니다. 별도로 백업하지 않으면 브라우저 데이터 삭제나 기기 변경 등으로 사라질 수 있습니다. 민감한 정보를 입력하지 마세요.</p>
-        <p id="storage-status" class="storage-status" role="status" aria-live="polite"></p>
-        <p class="retry-row"><button id="retry-save" class="secondary-button" type="button" hidden>저장 다시 시도</button></p>
-        <section class="backup" aria-labelledby="backup-title">
-          <h2 id="backup-title">JSON 백업 및 복원</h2>
-          <p class="help">다운로드한 JSON에는 세션 설정과 거래 기록 등 민감한 데이터가 포함될 수 있으니 안전하게 보관하세요. 파일은 클라우드에 저장되거나 전송되지 않습니다.</p>
-          <p class="help">내보내기는 마지막으로 적용한 세션만 내보냅니다. 적용하지 않은 설정은 파일에 포함되지 않습니다.</p>
-          <p class="help">가져오기를 확인하면 현재 세션의 모든 설정과 거래가 파일의 내용으로 대체됩니다. 아직 저장되지 않은 내용도 함께 대체됩니다.</p>
-          <button id="export-backup" class="secondary-button" type="button">JSON 백업 다운로드</button>
-          <label for="import-backup">JSON 백업 가져오기 (최대 1 MiB)</label>
-          <input id="import-backup" type="file" accept=".json,application/json" aria-describedby="backup-status">
-          <p id="backup-status" class="backup-status" role="status" aria-live="polite"></p>
-        </section>
-        <section class="backup sync" aria-labelledby="sync-title">
-          <h2 id="sync-title">계정 동기화 (선택)</h2>
-          <p class="help">서버에 저장하면 세션 설정과 거래 기록이 서버 데이터베이스에 보관되어 다른 기기에서도 불러올 수 있습니다. 이름·계좌번호 등 민감한 정보는 입력하지 마세요.</p>
-          <p id="sync-account" class="sync-account" role="status" aria-live="polite">계정 상태를 확인하는 중입니다.</p>
-          <form id="auth-form" novalidate hidden>
-            <label for="auth-email">이메일</label>
-            <input id="auth-email" type="email" autocomplete="username" inputmode="email" aria-describedby="auth-help">
-            <label for="auth-password">비밀번호</label>
-            <input id="auth-password" type="password" autocomplete="current-password" aria-describedby="auth-help">
-            <p id="auth-help" class="help">비밀번호는 10~200자로 입력하세요. 다른 곳에서 쓰는 비밀번호를 재사용하지 마세요.</p>
-            <div class="button-row">
-              <button id="auth-submit" class="primary-button" type="submit">로그인</button>
-              <button id="auth-toggle" class="secondary-button" type="button">계정 만들기로 전환</button>
-            </div>
-          </form>
-          <div id="sync-actions" class="button-row" hidden>
-            <button id="sync-push" class="secondary-button" type="button">서버에 저장</button>
-            <button id="sync-pull" class="secondary-button" type="button">서버에서 불러오기</button>
-            <button id="auth-logout" class="secondary-button" type="button">로그아웃</button>
-          </div>
-          <div id="conflict" class="conflict" role="group" aria-labelledby="conflict-title" hidden>
-            <h3 id="conflict-title">서버 기록과 충돌했습니다</h3>
-            <p id="conflict-detail" class="help"></p>
-            <pre id="conflict-preview" class="conflict-preview" tabindex="0" aria-label="서버에 저장된 기록" hidden></pre>
-            <div class="button-row">
-              <button id="conflict-view" class="secondary-button" type="button">서버 기록 보기</button>
-              <button id="conflict-adopt" class="secondary-button" type="button">서버 내용 사용</button>
-              <button id="conflict-overwrite" class="secondary-button" type="button">내 기록으로 덮어쓰기</button>
-              <button id="conflict-cancel" class="secondary-button" type="button">취소</button>
-            </div>
-          </div>
-          <p id="sync-status" class="sync-status" role="status" aria-live="polite"></p>
-          <p id="sync-error" class="error" role="alert" hidden></p>
-        </section>
-      </section>
-      <div class="workspace">
-        <section class="panel" aria-labelledby="settings-title">
-          <p class="eyebrow">01 / SESSION</p><h2 id="settings-title">가상 세션 설정</h2>
-          <p class="help">손실 허용액은 초기 잔고의 고정 비율입니다. 경계는 센트 단위로 올림합니다.</p>
-          <form id="settings-form" novalidate>
-            <label for="initial-balance">초기 잔고 (USD)</label><input id="initial-balance" type="text" inputmode="decimal" value="100000" autocomplete="off" aria-describedby="settings-help">
-            <label for="loss-percent">손실 허용 비율 (%)</label><input id="loss-percent" type="text" inputmode="decimal" value="5" autocomplete="off" aria-describedby="settings-help">
-            <p id="settings-help" class="help">초기 잔고는 0 초과, 비율은 0 초과 100 이하로 입력하세요. 금액은 소수 둘째 자리까지 가능합니다. 입력은 초안이며 <strong>설정 적용</strong>을 눌러야 계산과 저장에 반영됩니다.</p>
-            <div class="button-row">
-              <button id="apply-settings" class="primary-button" type="submit">설정 적용</button>
-              <button id="cancel-settings" class="secondary-button" type="button">변경 취소</button>
-            </div>
-          </form>
-          <p id="settings-pending" class="pending" role="status" aria-live="polite" hidden></p>
-          <p id="error" class="error" role="alert" hidden></p>
-          <div class="divider"></div>
-          <h2>종료된 거래 추가</h2>
-          <p class="help">입력 순서대로 계산합니다. 수익은 양수, 손실은 음수로 입력하세요.</p>
-          <form id="trade-form" novalidate>
-            <label for="trade-label">거래 이름</label><input id="trade-label" type="text" autocomplete="off" placeholder="예: 연습 거래 1">
-            <label for="trade-pnl">순손익 (USD)</label><input id="trade-pnl" type="text" inputmode="decimal" autocomplete="off" placeholder="예: -250.00" aria-describedby="trade-help">
-            <p id="trade-help" class="help">모든 비용을 포함한 종료 거래의 순손익을 직접 입력하세요.</p>
-            <button class="primary-button" type="submit">거래 추가</button>
-          </form>
-        </section>
-        <section class="panel results" aria-labelledby="results-title">
-          <p class="eyebrow">02 / REPLAY</p><h2 id="results-title">세션 다시 보기</h2>
-          <p class="help">남은 금액 = 잔고 − 경계. 0 이하는 가상의 경계에 도달하거나 그 아래임을 뜻합니다.</p>
-          <div id="summary" aria-live="polite" aria-atomic="true">
-            <div class="summary-grid"><div><span>고정 손실 경계</span><strong id="floor">—</strong></div><div><span>현재 잔고</span><strong id="balance">—</strong></div><div><span>경계까지 남은 금액</span><strong id="remaining">—</strong></div></div>
-            <p id="current-status" class="status"></p><p id="breach-status" class="status"></p>
-          </div>
-          <div class="list-heading"><div><h3>거래 기록</h3><p class="help">삭제하면 남은 거래의 이력을 처음부터 다시 계산합니다.</p></div><button id="clear-trades" class="secondary-button" type="button">전체 삭제</button></div>
-          <ol id="trade-list" class="trade-list" aria-label="순서대로 기록된 거래"></ol>
-          <p id="empty-list" class="help">아직 추가된 거래가 없습니다.</p>
-        </section>
-      </div>
-    </main>
-    <footer>OH MY PROP <span>교육용 가상 시뮬레이션</span></footer>
-  </div>
+  <main>
+    <h1>가상 거래 연습장이 아카데미로 이동했습니다</h1>
+    <p>새 주소: <a href="./academy/journal.html">/academy/journal.html</a>. 이 브라우저에 저장된 연습 기록과 백업 파일은 그대로 사용할 수 있습니다.</p>
+  </main>
 </body>
 </html>

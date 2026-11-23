@@ -1,0 +1,52 @@
+/* Operations console — builds on the trader theme (trader.css). */
+
+.ops-badge { background: var(--warn-bg); color: var(--warn); }
+.locked { max-width: 640px; margin: 48px auto; padding: 0 16px; }
+.locked h1 { font-size: 1.3rem; margin-bottom: 8px; }
+.primary-link { color: var(--accent); font-weight: 700; }
+
+.console { max-width: 1180px; margin: 0 auto; padding: 18px 20px 60px; }
+.console h1 { font-size: 1.45rem; margin: 6px 0 16px; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid var(--line); margin-bottom: 18px; }
+.tab { padding: 10px 14px; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--muted); font-weight: 700; cursor: pointer; }
+.tab[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); }
+.count { display: inline-block; min-width: 20px; padding: 0 6px; border-radius: 10px; background: var(--sell-bg); color: var(--sell); font-size: .75rem; }
+.count:empty { display: none; }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { padding: 6px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); font-size: .85rem; }
+
+.filters { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; margin-bottom: 12px; }
+.filters label { margin: 0; }
+.filters select, .filters input { padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+.table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+.table th, .table td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+.table th { color: var(--muted); font-weight: 700; background: var(--surface); position: sticky; top: 0; }
+.table tbody tr { cursor: pointer; }
+.table tbody tr:hover, .table tbody tr:focus-visible { background: var(--surface-2); }
+.table .num { font-variant-numeric: tabular-nums; text-align: right; }
+.table .neg { color: var(--sell); }
+.table .pos { color: var(--buy); }
+
+.badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: .78rem; font-weight: 700; background: var(--surface-2); border: 1px solid var(--line); }
+.badge[data-status="active"] { color: var(--info); }
+.badge[data-status="passed"] { color: var(--buy); }
+.badge[data-status="breached"], .badge[data-status="expired"] { color: var(--sell); }
+.badge[data-status="open"] { color: var(--warn); }
+
+.detail { margin-top: 16px; }
+.detail-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.verify-result { margin: 10px 0; padding: 10px 12px; border-radius: 8px; background: var(--surface-2); border-left: 4px solid var(--buy); }
+.verify-result[data-match="false"] { border-left-color: var(--sell); }
+
+.cards { display: grid; gap: 12px; }
+.card { padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.card h3 { font-size: 1rem; margin-bottom: 6px; }
+.card .reason { white-space: pre-wrap; margin: 8px 0; padding: 10px; border-radius: 8px; background: var(--surface-2); }
+.decision { display: grid; gap: 8px; margin-top: 10px; }
+.decision textarea { width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); }
+.decision-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.decision-actions .primary-btn { width: auto; }
+.empty { color: var(--muted); padding: 14px 0; }

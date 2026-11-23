@@ -2,11 +2,16 @@
 // (no innerHTML), and no inline style attributes (the CSP forbids them).
 
 import * as api from './api.js';
+import { createCandleChart } from './chart.js';
+import { mountThemeToggle } from '../ui/theme.js';
+import { mergeCandles, midText } from './chart-scale.js';
 import { formatCents, formatSignedCents, formatTimestamp } from './format.js';
 import {
   describeEvent, describeRule, limitCards, objectiveCards, orderNotional, phaseLabel,
   programName, programPitch, ruleHighlights, statusBanner, stopLossPreview,
 } from './view.js';
+import { formatWinRate, tradeReview } from './review.js';
+import { adverseVerdict, appealReasonOk, appealStatus, groupSecret, verdictFacts } from './ops-view.js';
 
 const $ = (id) => document.getElementById(id);
 const QUOTE_POLL_MS = 2000;
@@ -22,9 +27,14 @@ const state = {
   current: null, // { account, spec, phase, events }
   quotes: new Map(),
   previousBid: new Map(), // symbol -> bid before the latest quote, for the up/down tick
+  flash: new Map(), // symbol -> { dir: 1 | -1, until: ms } — tint a moved price briefly
   closeStream: null,
   quoteTimer: null,
   pendingOrder: null, // { key, body } kept when a send failed to reach the server
+  mfaChallenge: null, // set after a correct password when two-factor is on
+  appeals: [],
+  chart: null,
+  candles: { symbol: null, list: [], loading: null },
   rendered: { positions: null, orders: null, activity: null },
 };
 
@@ -61,6 +71,12 @@ function renderShell() {
   $('app').hidden = !signedIn;
   $('logout').hidden = !signedIn;
   $('user-label').textContent = signedIn ? state.user.email : '';
+  $('security-open').hidden = !signedIn;
+  $('admin-link').hidden = !(signedIn && state.user.role);
+  $('mfa-step').hidden = !state.mfaChallenge;
+  $('auth-email').disabled = Boolean(state.mfaChallenge);
+  $('auth-password').disabled = Boolean(state.mfaChallenge);
+  $('auth-toggle').hidden = Boolean(state.mfaChallenge);
   $('auth-title').textContent = state.registerMode ? '계정 만들기' : '로그인';
   $('auth-submit').textContent = state.registerMode ? '계정 만들기' : '로그인';
   $('auth-toggle').textContent = state.registerMode ? '이미 계정이 있어요. 로그인' : '처음이신가요? 계정 만들기';
@@ -69,6 +85,7 @@ function renderShell() {
 
 async function submitAuth(event) {
   event.preventDefault();
+  if (state.mfaChallenge) return submitCode();
   const email = $('auth-email').value.trim();
   const password = $('auth-password').value;
   const result = state.registerMode ? await api.register(email, password) : await api.login(email, password);
@@ -77,17 +94,100 @@ async function submitAuth(event) {
     return;
   }
   $('auth-error').textContent = '';
+  if (result.mfaRequired) {
+    state.mfaChallenge = result.challenge;
+    renderShell();
+    $('auth-code').focus();
+    return;
+  }
   $('auth-password').value = '';
   state.user = result.user;
+  if (!state.user.mfa) state.user = (await api.getMe()).user ?? state.user;
   renderShell();
   await loadWorkspace();
+}
+
+async function submitCode() {
+  const result = await api.loginTotp(state.mfaChallenge, $('auth-code').value.trim());
+  if (!result.ok) {
+    $('auth-error').textContent = result.attemptsLeft !== undefined ? `${result.message} (남은 시도 ${result.attemptsLeft}회)` : result.message;
+    if (result.restart) {
+      state.mfaChallenge = null;
+      $('auth-code').value = '';
+      renderShell();
+    }
+    return;
+  }
+  state.mfaChallenge = null;
+  $('auth-error').textContent = '';
+  $('auth-password').value = '';
+  $('auth-code').value = '';
+  state.user = (await api.getMe()).user ?? result.user;
+  renderShell();
+  await loadWorkspace();
+}
+
+// ---- security (two-factor) -----------------------------------------------------------
+
+function showSecurity() {
+  closeDashboard();
+  $('catalog').hidden = true;
+  $('security').hidden = false;
+  renderSecurity();
+}
+
+function renderSecurity(setup = null) {
+  const mfa = state.user?.mfa ?? { enabled: false };
+  $('mfa-status').textContent = mfa.enabled ? '켜짐 — 로그인할 때 인증 앱 코드를 묻습니다.' : '꺼짐 — 비밀번호만으로 로그인합니다.';
+  $('mfa-status').dataset.on = String(Boolean(mfa.enabled));
+  $('mfa-setup').hidden = !setup;
+  if (setup) {
+    $('mfa-secret').textContent = groupSecret(setup.secret);
+    $('mfa-uri').textContent = setup.otpauthUri;
+  }
+  $('mfa-start').hidden = mfa.enabled || Boolean(setup);
+  $('mfa-enable').hidden = mfa.enabled || !setup;
+  $('mfa-disable').hidden = !mfa.enabled;
+  $('mfa-code-label').hidden = !(setup || mfa.enabled);
+  $('mfa-code').hidden = !(setup || mfa.enabled);
+  $('mfa-code-label').textContent = mfa.enabled ? '끄려면 현재 6자리 코드를 입력하세요' : '앱에 나온 6자리 코드';
+  $('mfa-error').textContent = '';
+}
+
+async function startMfa() {
+  const result = await api.totpSetup();
+  if (!result.ok) return void ($('mfa-error').textContent = result.message);
+  renderSecurity(result);
+  $('mfa-code').focus();
+}
+
+async function submitMfa(event) {
+  event.preventDefault();
+  const code = $('mfa-code').value.trim();
+  const result = await api.totpEnable(code);
+  if (!result.ok) return void ($('mfa-error').textContent = result.message);
+  state.user = { ...state.user, mfa: result.mfa };
+  $('mfa-code').value = '';
+  renderSecurity();
+  toast('2단계 인증을 켰습니다. 다음 로그인부터 코드를 묻습니다.');
+}
+
+async function disableMfa() {
+  const result = await api.totpDisable($('mfa-code').value.trim());
+  if (!result.ok) return void ($('mfa-error').textContent = result.message);
+  state.user = { ...state.user, mfa: result.mfa };
+  $('mfa-code').value = '';
+  renderSecurity();
+  toast('2단계 인증을 껐습니다.', 'warning');
 }
 
 async function doLogout() {
   await api.logout();
   closeDashboard();
   state.user = null;
+  state.mfaChallenge = null;
   state.accounts = [];
+  $('security').hidden = true;
   renderShell();
   toast('로그아웃했습니다.');
 }
@@ -114,6 +214,7 @@ async function loadWorkspace() {
 
 function showCatalog() {
   closeDashboard();
+  $('security').hidden = true;
   $('catalog').hidden = false;
   renderAccounts();
 }
@@ -208,21 +309,37 @@ function closeDashboard() {
   state.pendingOrder = null;
   state.rendered = { positions: null, orders: null, activity: null };
   $('dashboard').hidden = true;
+  $('verdict-card').hidden = true;
+  state.appeals = [];
+}
+
+// The review needs every fill, so read the log page by page (1,000 per page).
+async function loadAllEvents(id) {
+  const all = [];
+  for (;;) {
+    const page = await api.getEvents(id, all.at(-1)?.seq ?? 0);
+    if (!page.ok) return all.length ? { ok: true, events: all } : page;
+    all.push(...page.events);
+    if (page.events.length < 1000) return { ok: true, events: all };
+  }
 }
 
 async function selectAccount(id) {
   closeDashboard();
-  const [account, events] = await Promise.all([api.getAccount(id), api.getEvents(id)]);
+  const [account, events] = await Promise.all([api.getAccount(id), loadAllEvents(id)]);
   if (!account.ok) return toast(account.message, 'warning');
   const entry = state.specs.get(specKey(account.program, account.version));
   if (!entry) return toast('상품 규칙을 불러오지 못했습니다.', 'warning');
   const phase = entry.spec.phases.find((item) => item.id === account.phase);
   state.current = { account, spec: entry.spec, phase, events: events.ok ? events.events : [] };
   $('catalog').hidden = true;
+  $('security').hidden = true;
   $('dashboard').hidden = false;
+  loadAppeals(id);
   renderInstruments();
   renderRuleDetail();
   renderDashboard();
+  loadCandles();
   renderAccounts();
   if (account.status === 'active') {
     state.closeStream = api.openStream(id, {
@@ -266,12 +383,73 @@ async function refreshQuotes() {
   if (!result.ok) return;
   for (const quote of result.quotes) {
     const previous = state.quotes.get(quote.symbol);
-    if (previous?.bid && previous.bid !== quote.bid) state.previousBid.set(quote.symbol, previous.bid);
+    if (previous?.bid && previous.bid !== quote.bid) {
+      state.previousBid.set(quote.symbol, previous.bid);
+      state.flash.set(quote.symbol, { dir: Math.sign(Number(quote.bid) - Number(previous.bid)), until: Date.now() + 600 });
+    }
     state.quotes.set(quote.symbol, quote);
   }
   renderMarket();
   renderQuoteLine();
   renderTicket();
+  refreshCandles();
+}
+
+// ---- chart -------------------------------------------------------------------------
+
+async function loadCandles() {
+  const symbol = $('order-symbol').value;
+  if (!symbol) return;
+  state.chart ??= createCandleChart({ canvas: $('price-chart'), readout: $('chart-readout') });
+  state.candles = { symbol, list: [], loading: null };
+  $('chart-symbol').textContent = symbol;
+  renderChart();
+  const result = await api.getCandles(symbol, { limit: 240 });
+  if (state.candles.symbol !== symbol || !result.ok) return;
+  state.candles.list = result.candles;
+  renderChart();
+}
+
+// Re-fetch from the newest stored bar on; that bar is replaced by its updated version.
+async function refreshCandles() {
+  const { symbol, list, loading } = state.candles;
+  if (!symbol || loading) return;
+  const since = list.at(-1)?.t;
+  state.candles.loading = api.getCandles(symbol, { since, limit: since ? 1440 : 240 });
+  const result = await state.candles.loading;
+  if (state.candles.symbol !== symbol) return;
+  state.candles.loading = null;
+  if (!result.ok) return;
+  state.candles.list = since ? mergeCandles(state.candles.list, result.candles) : result.candles;
+  renderChart();
+}
+
+function chartLines(symbol) {
+  const { account } = state.current;
+  const lines = account.positions
+    .filter((position) => position.symbol === symbol)
+    .map((position) => ({ price: position.averagePrice, kind: 'entry', label: `평균 진입가 (${position.side === 'long' ? '매수' : '매도'} ${position.qty})` }));
+  for (const order of account.openOrders) {
+    if (order.symbol !== symbol || order.price == null) continue;
+    const kind = order.reduceOnly ? (order.orderType === 'stop' ? 'stop' : 'take') : 'order';
+    const label = { stop: '손절', take: '익절', order: order.orderType === 'stop' ? '스톱 대기' : '지정가 대기' }[kind];
+    lines.push({ price: order.price, kind, label: `${label} ${order.side === 'buy' ? '매수' : '매도'} ${order.qty}` });
+  }
+  return lines;
+}
+
+function renderChart() {
+  if (!state.chart || !state.current) return;
+  const symbol = state.candles.symbol;
+  const instrument = state.current.spec.instruments.find((item) => item.symbol === symbol);
+  if (!instrument) return;
+  const quote = state.quotes.get(symbol);
+  state.chart.update({
+    candles: state.candles.list,
+    decimals: instrument.priceDecimals,
+    lastPrice: quote?.status === 'ok' ? midText(quote.bid, quote.ask, instrument.priceDecimals) : null,
+    lines: chartLines(symbol),
+  });
 }
 
 function renderStreamStatus(status) {
@@ -318,6 +496,7 @@ function renderDashboard() {
   renderTicket();
   const tradable = account.status === 'active' && !account.paused;
   for (const node of $('order-form').elements) node.disabled = !tradable;
+  renderChart();
 }
 
 function renderGauges() {
@@ -360,6 +539,12 @@ function renderGoals() {
   }));
 }
 
+function flashClass(symbol) {
+  const flash = state.flash.get(symbol);
+  if (!flash || Date.now() > flash.until) return '';
+  return flash.dir > 0 ? ' flash-up' : flash.dir < 0 ? ' flash-down' : '';
+}
+
 function renderMarket() {
   if (!state.current) return;
   $('market').replaceChildren(...state.current.spec.instruments.map((instrument) => {
@@ -374,13 +559,14 @@ function renderMarket() {
       onclick: () => {
         $('order-symbol').value = instrument.symbol;
         renderMarket();
+        loadCandles();
         renderQuoteLine();
         renderQtyPresets();
         renderTicket();
       },
     },
     el('span', { class: 'ticker-symbol', text: instrument.symbol }),
-    el('strong', { class: 'ticker-price', text: ok ? `${direction > 0 ? '▲ ' : direction < 0 ? '▼ ' : ''}${quote.bid}` : '시세 없음' }),
+    el('strong', { class: `ticker-price${flashClass(instrument.symbol)}`, text: ok ? `${direction > 0 ? '▲ ' : direction < 0 ? '▼ ' : ''}${quote.bid}` : quote?.stale ? '시세 지연' : '시세 없음' }),
     el('span', { class: 'muted small', text: ok ? `팔 때 ${quote.bid} · 살 때 ${quote.ask}` : '주문할 수 없습니다' }),
     );
   }));
@@ -439,10 +625,55 @@ function renderOrders() {
   )));
 }
 
+// ---- verdict card and appeals -------------------------------------------------------
+
+async function loadAppeals(id) {
+  const result = await api.getAppeals(id);
+  if (state.current?.account.id !== id) return;
+  state.appeals = result.ok ? result.appeals : [];
+  renderVerdictCard();
+}
+
+function renderVerdictCard() {
+  if (!state.current) return;
+  const verdict = adverseVerdict(state.current.events);
+  const card = $('verdict-card');
+  card.hidden = !verdict;
+  if (!verdict) return;
+  const { title, facts } = verdictFacts(verdict, state.current.phase?.rules ?? []);
+  $('verdict-title').textContent = title;
+  $('verdict-facts').replaceChildren(...facts.flatMap((fact) => [el('dt', { text: fact.label }), el('dd', { text: fact.value })]));
+  const appeal = state.appeals.find((item) => item.eventSeq === verdict.seq);
+  const status = appealStatus(appeal);
+  $('appeal-status').hidden = !status;
+  if (status) {
+    $('appeal-status').textContent = status.text;
+    $('appeal-status').dataset.tone = status.tone;
+  }
+  $('appeal-form').hidden = Boolean(appeal);
+  $('appeal-form').dataset.seq = String(verdict.seq);
+}
+
+async function submitAppeal(event) {
+  event.preventDefault();
+  const reason = $('appeal-reason').value;
+  if (!appealReasonOk(reason)) return void ($('appeal-error').textContent = '사유를 10자 이상 2000자 이하로 적어 주세요.');
+  const id = state.current.account.id;
+  const result = await api.createAppeal(id, Number($('appeal-form').dataset.seq), reason.trim());
+  if (!result.ok) return void ($('appeal-error').textContent = result.message);
+  $('appeal-error').textContent = '';
+  $('appeal-reason').value = '';
+  state.appeals = [...state.appeals, result.appeal];
+  renderVerdictCard();
+  toast('이의 제기를 접수했습니다.');
+}
+
 function renderActivity() {
   const lastSeq = state.current.events.at(-1)?.seq ?? 0;
   if (lastSeq === state.rendered.activity) return;
   state.rendered.activity = lastSeq;
+  renderVerdictCard();
+  renderReview();
   const verdicts = state.current.events.filter((event) => event.type === 'verdict');
   $('verdicts').replaceChildren(...(verdicts.length ? verdicts.map((event) => el('article', { class: `verdict ${event.verdict}` },
     el('strong', { text: describeEvent(event) }),
@@ -454,6 +685,35 @@ function renderActivity() {
     el('span', { text: describeEvent(event) }),
     el('time', { text: formatTimestamp(event.ts) }),
   )));
+}
+
+const REVIEW_TRADE_LIMIT = 50;
+
+function centsText(cents, signed = false) {
+  if (cents === null) return '계산 불가';
+  return signed ? formatSignedCents(cents) : formatCents(cents);
+}
+
+function renderReview() {
+  const review = tradeReview(state.current.events);
+  const trade = (item) => (item ? `${centsText(item.pnlCents, true)} · ${item.symbol} · 기록 #${item.seq}` : '없음');
+  const facts = [
+    ['누적 확정 손익', centsText(review.netPnlCents, true)],
+    ['낸 수수료', centsText(review.feesCents)],
+    ['닫은 거래', `${review.closedTrades}건 (이익 ${review.wins} · 손실 ${review.losses} · 본전 ${review.flat})`],
+    ['승률', formatWinRate(review.winRateTenths)],
+    ['최대 잔고 하락액', centsText(review.maxDrawdownCents)],
+    ['가장 큰 이익', trade(review.best)],
+    ['가장 큰 손실', trade(review.worst)],
+    ['처음 규칙 위반', review.firstBreach ? `${review.firstBreach.ruleId ? `규칙 ${review.firstBreach.ruleId} · ` : ''}${formatTimestamp(review.firstBreach.ts)} · 기록 #${review.firstBreach.seq}` : '없음'],
+  ];
+  $('review-facts').replaceChildren(...facts.flatMap(([term, value]) => [el('dt', { text: term }), el('dd', { text: value })]));
+  const recent = review.trades.slice(-REVIEW_TRADE_LIMIT).reverse();
+  $('review-trades').replaceChildren(...(recent.length ? recent.map((item) => el('li', {},
+    el('span', { class: 'seq', text: `#${item.seq}` }),
+    el('span', { text: `${item.symbol} ${item.side === 'buy' ? '매수' : '매도'} ${item.qty} @ ${item.price} · ${centsText(item.pnlCents, true)} · 잔고 ${centsText(item.balanceCents)}` }),
+    el('time', { text: formatTimestamp(item.ts) }),
+  )) : [el('li', { class: 'muted small', text: '아직 닫은 거래가 없습니다. 포지션을 정리하면 결과가 여기에 쌓입니다.' })]));
 }
 
 function renderRuleDetail() {
@@ -598,6 +858,8 @@ async function closePosition(symbol, button) {
 // ---- boot ------------------------------------------------------------------------
 
 async function boot() {
+  mountThemeToggle($('theme-slot'));
+  globalThis.addEventListener('omp:themechange', () => renderChart());
   $('auth-form').addEventListener('submit', submitAuth);
   $('auth-toggle').addEventListener('click', () => {
     state.registerMode = !state.registerMode;
@@ -610,10 +872,16 @@ async function boot() {
     $('guide').hidden = true;
   });
   $('order-form').addEventListener('submit', submitOrder);
+  $('security-open').addEventListener('click', showSecurity);
+  $('mfa-start').addEventListener('click', startMfa);
+  $('mfa-form').addEventListener('submit', submitMfa);
+  $('mfa-disable').addEventListener('click', disableMfa);
+  $('appeal-form').addEventListener('submit', submitAppeal);
   $('order-form').addEventListener('input', renderTicket);
   $('order-form').addEventListener('change', (event) => {
     if (event.target.id === 'order-symbol') {
       renderMarket();
+      loadCandles();
       renderQtyPresets();
     }
     renderQuoteLine();

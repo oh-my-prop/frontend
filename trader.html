@@ -226,6 +226,17 @@
           </section>
         </div>
 
+        <section class="panel" aria-labelledby="review-title">
+          <div class="panel-head">
+            <h2 id="review-title">거래 복기</h2>
+            <p class="muted small">포지션을 줄이거나 닫은 체결만 거래로 셉니다. 손익은 그 체결의 수수료를 뺀 값입니다.</p>
+          </div>
+          <dl id="review-facts" class="facts review-facts"></dl>
+          <p class="muted small">최대 잔고 하락액은 체결이 끝날 때마다의 잔고로 잰 값입니다. 장중 시세나 아직 확정 안 된 손실은 들어가지 않습니다.</p>
+          <h3 class="sub-head">닫은 거래</h3>
+          <ol id="review-trades" class="activity review-trades" reversed></ol>
+        </section>
+
         <details class="panel fold">
           <summary>판정과 활동 기록</summary>
           <h3 class="sub-head">판정</h3>

@@ -10,6 +10,7 @@ import {
   describeEvent, describeRule, limitCards, objectiveCards, orderNotional, phaseLabel,
   programName, programPitch, ruleHighlights, statusBanner, stopLossPreview,
 } from './view.js';
+import { formatWinRate, tradeReview } from './review.js';
 import { adverseVerdict, appealReasonOk, appealStatus, groupSecret, verdictFacts } from './ops-view.js';
 
 const $ = (id) => document.getElementById(id);
@@ -312,9 +313,20 @@ function closeDashboard() {
   state.appeals = [];
 }
 
+// The review needs every fill, so read the log page by page (1,000 per page).
+async function loadAllEvents(id) {
+  const all = [];
+  for (;;) {
+    const page = await api.getEvents(id, all.at(-1)?.seq ?? 0);
+    if (!page.ok) return all.length ? { ok: true, events: all } : page;
+    all.push(...page.events);
+    if (page.events.length < 1000) return { ok: true, events: all };
+  }
+}
+
 async function selectAccount(id) {
   closeDashboard();
-  const [account, events] = await Promise.all([api.getAccount(id), api.getEvents(id)]);
+  const [account, events] = await Promise.all([api.getAccount(id), loadAllEvents(id)]);
   if (!account.ok) return toast(account.message, 'warning');
   const entry = state.specs.get(specKey(account.program, account.version));
   if (!entry) return toast('상품 규칙을 불러오지 못했습니다.', 'warning');
@@ -661,6 +673,7 @@ function renderActivity() {
   if (lastSeq === state.rendered.activity) return;
   state.rendered.activity = lastSeq;
   renderVerdictCard();
+  renderReview();
   const verdicts = state.current.events.filter((event) => event.type === 'verdict');
   $('verdicts').replaceChildren(...(verdicts.length ? verdicts.map((event) => el('article', { class: `verdict ${event.verdict}` },
     el('strong', { text: describeEvent(event) }),
@@ -672,6 +685,35 @@ function renderActivity() {
     el('span', { text: describeEvent(event) }),
     el('time', { text: formatTimestamp(event.ts) }),
   )));
+}
+
+const REVIEW_TRADE_LIMIT = 50;
+
+function centsText(cents, signed = false) {
+  if (cents === null) return '계산 불가';
+  return signed ? formatSignedCents(cents) : formatCents(cents);
+}
+
+function renderReview() {
+  const review = tradeReview(state.current.events);
+  const trade = (item) => (item ? `${centsText(item.pnlCents, true)} · ${item.symbol} · 기록 #${item.seq}` : '없음');
+  const facts = [
+    ['누적 확정 손익', centsText(review.netPnlCents, true)],
+    ['낸 수수료', centsText(review.feesCents)],
+    ['닫은 거래', `${review.closedTrades}건 (이익 ${review.wins} · 손실 ${review.losses} · 본전 ${review.flat})`],
+    ['승률', formatWinRate(review.winRateTenths)],
+    ['최대 잔고 하락액', centsText(review.maxDrawdownCents)],
+    ['가장 큰 이익', trade(review.best)],
+    ['가장 큰 손실', trade(review.worst)],
+    ['처음 규칙 위반', review.firstBreach ? `${review.firstBreach.ruleId ? `규칙 ${review.firstBreach.ruleId} · ` : ''}${formatTimestamp(review.firstBreach.ts)} · 기록 #${review.firstBreach.seq}` : '없음'],
+  ];
+  $('review-facts').replaceChildren(...facts.flatMap(([term, value]) => [el('dt', { text: term }), el('dd', { text: value })]));
+  const recent = review.trades.slice(-REVIEW_TRADE_LIMIT).reverse();
+  $('review-trades').replaceChildren(...(recent.length ? recent.map((item) => el('li', {},
+    el('span', { class: 'seq', text: `#${item.seq}` }),
+    el('span', { text: `${item.symbol} ${item.side === 'buy' ? '매수' : '매도'} ${item.qty} @ ${item.price} · ${centsText(item.pnlCents, true)} · 잔고 ${centsText(item.balanceCents)}` }),
+    el('time', { text: formatTimestamp(item.ts) }),
+  )) : [el('li', { class: 'muted small', text: '아직 닫은 거래가 없습니다. 포지션을 정리하면 결과가 여기에 쌓입니다.' })]));
 }
 
 function renderRuleDetail() {

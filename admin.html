@@ -38,6 +38,7 @@
       <button type="button" class="tab" data-view="overview" aria-current="page">개요</button>
       <button type="button" class="tab" data-view="accounts">계정</button>
       <button type="button" class="tab" data-view="appeals">이의 제기 <span id="appeal-count" class="count"></span></button>
+      <button type="button" class="tab" data-view="money">결제·원장</button>
       <button type="button" class="tab" data-view="risk">부정거래 대기열</button>
       <button type="button" class="tab" data-view="audit" id="audit-tab">감사 기록</button>
     </nav>
@@ -110,6 +111,32 @@
       <div class="table-wrap"><table class="table">
         <thead><tr><th scope="col">순위</th><th scope="col">계정</th><th scope="col">경로</th><th scope="col">행동 점수</th><th scope="col">근거</th></tr></thead>
         <tbody id="risk-rows"></tbody>
+      </table></div>
+    </section>
+
+    <section id="view-money" class="view" aria-labelledby="money-title" hidden>
+      <h1 id="money-title">결제·원장</h1>
+      <p class="muted">금액은 모두 <strong class="won-note">원화</strong>입니다. 거래 계정의 가상 USD와 다른 돈이며 섞이지 않습니다. 이 화면은 <strong>조회 전용</strong>입니다 — 환불·취소는 사용자의 청약 철회 경로로만 처리됩니다.</p>
+      <div id="money-alerts" class="cards"></div>
+      <div id="money-stats" class="stats"></div>
+      <section class="panel">
+        <h2>지급 준비금</h2>
+        <p id="reserve-line" class="muted"></p>
+        <dl id="reserve-facts" class="facts"></dl>
+      </section>
+      <h2 class="sub-head">원장 잔액</h2>
+      <div class="table-wrap"><table class="table plain">
+        <thead><tr><th scope="col">계정과목</th><th scope="col">코드</th><th scope="col">잔액(원화)</th></tr></thead>
+        <tbody id="ledger-rows"></tbody>
+      </table></div>
+      <h2 class="sub-head">주문</h2>
+      <div class="filters">
+        <label for="money-status">상태</label>
+        <select id="money-status"></select>
+      </div>
+      <div class="table-wrap"><table class="table plain">
+        <thead><tr><th scope="col">주문</th><th scope="col">상태</th><th scope="col">금액(원화)</th><th scope="col">상품</th><th scope="col">사용자</th><th scope="col">거래 계정</th><th scope="col">갱신</th></tr></thead>
+        <tbody id="money-rows"></tbody>
       </table></div>
     </section>
 

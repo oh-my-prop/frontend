@@ -4,6 +4,8 @@
 
 import { describeEvent } from '../trader/view.js';
 import { formatCents, formatTimestamp } from '../trader/format.js';
+import { formatKrw, orderStatusView } from '../trader/checkout-view.js';
+import { ORDER_STATUS_FILTERS, ledgerRows, moneyAlerts, moneyOrderRow, reserveView } from './money-view.js';
 import { mountThemeToggle } from '../ui/theme.js';
 
 const $ = (id) => document.getElementById(id);
@@ -68,8 +70,8 @@ function show(view) {
     if (tab.dataset.view === view) tab.setAttribute('aria-current', 'page');
     else tab.removeAttribute('aria-current');
   }
-  for (const name of ['overview', 'accounts', 'appeals', 'risk', 'audit']) $(`view-${name}`).hidden = name !== view;
-  ({ overview: loadOverview, accounts: loadAccounts, appeals: loadAppeals, risk: loadRisk, audit: loadAudit })[view]();
+  for (const name of ['overview', 'accounts', 'appeals', 'money', 'risk', 'audit']) $(`view-${name}`).hidden = name !== view;
+  ({ overview: loadOverview, accounts: loadAccounts, appeals: loadAppeals, money: loadMoney, risk: loadRisk, audit: loadAudit })[view]();
 }
 
 // ---- overview ---------------------------------------------------------------------
@@ -241,6 +243,69 @@ async function loadAudit() {
   )));
 }
 
+// ---- money (결제·원장) ----------------------------------------------------------------
+
+// 조회 전용이다. 서버에 환불·취소 경로가 없고(ops-api.js:250-264), 운영자가 금액을
+// 움직이는 길은 만들지 않는다. 여기서 답해야 하는 것은 "어디까지 진행됐는가"뿐이다.
+async function loadMoney() {
+  const status = $('money-status').value;
+  const result = await call('GET', `/api/v2/admin/money${status ? `?status=${status}` : ''}`);
+  if (!result.ok) {
+    $('money-rows').replaceChildren(el('tr', {}, el('td', { colspan: '7', class: 'empty', text: result.message })));
+    $('money-alerts').replaceChildren();
+    $('money-stats').replaceChildren();
+    $('ledger-rows').replaceChildren();
+    return toast(result.message, 'warning');
+  }
+  const reserve = reserveView(result.reserve);
+  const alerts = moneyAlerts(result);
+  $('money-alerts').replaceChildren(...alerts.map((alert) => el('article', { class: 'card alert', 'data-tone': alert.tone, role: 'alert' },
+    el('h3', { text: alert.text }),
+    alert.detail ? el('p', { class: 'small muted', text: alert.detail }) : null,
+  )));
+  const stat = (label, value, help, tone) => el('div', { class: 'stat', 'data-tone': tone ?? null },
+    el('span', { class: 'stat-label', text: label }),
+    el('strong', { text: value }),
+    el('span', { class: 'stat-help', text: help }));
+  const paidWithoutAccount = result.orders.filter((order) => order.status === 'paid' && !order.accountId).length;
+  $('money-stats').replaceChildren(
+    stat('주문', String(result.orders.length), status ? '거른 결과' : '최근 200건'),
+    stat('결제 완료·계정 없음', String(paidWithoutAccount), '0이어야 정상입니다', paidWithoutAccount ? 'danger' : null),
+    stat('아웃박스 대기', String(result.outbox?.pending ?? 0), '처리를 기다리는 작업'),
+    stat('데드레터', String(result.outbox?.deadLetters ?? 0), '재시도를 포기한 작업', (result.outbox?.deadLetters ?? 0) ? 'danger' : null),
+    stat('미정산 저널', String(result.unbalancedJournals?.length ?? 0), '합이 0이 아닌 분개', (result.unbalancedJournals?.length ?? 0) ? 'danger' : null),
+  );
+  $('reserve-line').textContent = reserve.help;
+  $('reserve-line').dataset.tone = reserve.tone;
+  $('reserve-facts').replaceChildren(
+    el('dt', { text: '신규 펀딩 승급' }),
+    el('dd', {}, el('span', { class: 'badge', 'data-status': reserve.halted ? 'breached' : 'active', text: reserve.halted ? '중단됨' : '정상' })),
+    el('dt', { text: '준비금' }), el('dd', { class: 'krw-cell', text: formatKrw(result.reserve?.reserveKrw ?? 0) }),
+    el('dt', { text: '미지급 추정액' }), el('dd', { class: 'krw-cell', text: formatKrw(result.reserve?.outstandingKrw ?? 0) }),
+    el('dt', { text: '승인·미송금' }), el('dd', { class: 'krw-cell', text: formatKrw(result.reserve?.approvedUnpaidKrw ?? 0) }),
+    el('dt', { text: '소진율' }), el('dd', { text: reserve.ratioText }),
+  );
+  const ledger = ledgerRows(result.ledger);
+  $('ledger-rows').replaceChildren(...(ledger.length ? ledger.map((row) => el('tr', {},
+    el('td', { text: row.label }),
+    el('td', {}, el('code', { class: 'small', text: row.account })),
+    el('td', { class: 'num krw-cell', text: formatKrw(row.amountKrw) }),
+  )) : [el('tr', {}, el('td', { colspan: '3', class: 'empty', text: '분개가 아직 없습니다.' }))]));
+  $('money-rows').replaceChildren(...(result.orders.length ? result.orders.map(moneyOrderRow).map((row) => el('tr', {},
+    el('td', {}, el('code', { class: 'small', text: row.orderId })),
+    el('td', {},
+      el('span', { class: 'badge', 'data-tone': orderStatusView(row.status).tone, text: orderStatusView(row.status).label }),
+      row.failureCode ? el('p', { class: 'small muted', text: row.failureCode }) : null),
+    el('td', { class: 'num krw-cell', text: formatKrw(row.amountKrw) }),
+    el('td', { class: 'small', text: row.productText }),
+    el('td', { class: 'num', text: row.userId === null ? '—' : `#${row.userId}` }),
+    el('td', { class: row.warn ? 'warn-cell' : '' }, row.accountId
+      ? el('button', { class: 'link-btn', type: 'button', text: `#${row.accountId}`, onclick: () => { show('accounts'); openAccount(row.accountId); } })
+      : el('span', { text: row.accountText })),
+    el('td', { class: 'small', text: formatTimestamp(row.updatedAt ?? row.createdAt) }),
+  )) : [el('tr', {}, el('td', { colspan: '7', class: 'empty', text: '해당하는 주문이 없습니다.' }))]));
+}
+
 // ---- boot ---------------------------------------------------------------------------
 
 async function boot() {
@@ -264,6 +329,8 @@ async function boot() {
   });
   $('verify-replay').addEventListener('click', verifyReplay);
   $('appeal-filter').addEventListener('change', loadAppeals);
+  $('money-status').replaceChildren(...ORDER_STATUS_FILTERS.map((option) => el('option', { value: option.value, text: option.label })));
+  $('money-status').addEventListener('change', loadMoney);
   show('overview');
 }
 

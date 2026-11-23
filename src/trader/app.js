@@ -13,6 +13,7 @@ import {
 import { formatWinRate, tradeReview } from './review.js';
 import { adverseVerdict, appealReasonOk, appealStatus, groupSecret, verdictFacts } from './ops-view.js';
 import { accountsSynced, closeCheckout, initCheckout, openCheckout } from './checkout.js';
+import { closeIdentity, initIdentity, resetIdentity } from './identity.js';
 import { PAID_NOTICE } from '../site/view.js';
 
 const $ = (id) => document.getElementById(id);
@@ -134,6 +135,7 @@ async function submitCode() {
 function showSecurity() {
   closeDashboard();
   closeCheckout();
+  closeIdentity();
   $('catalog').hidden = true;
   $('security').hidden = false;
   renderSecurity();
@@ -187,6 +189,9 @@ async function disableMfa() {
 async function doLogout() {
   await api.logout();
   closeDashboard();
+  closeCheckout();
+  closeIdentity();
+  resetIdentity();
   state.user = null;
   state.mfaChallenge = null;
   state.accounts = [];
@@ -198,6 +203,7 @@ async function doLogout() {
 // ---- workspace ----------------------------------------------------------------------
 
 async function loadWorkspace() {
+  resetIdentity(); // 로그인한 사용자가 바뀌었을 수 있다
   const [programs, accounts, quotes] = await Promise.all([api.listPrograms(), api.listAccounts(), api.getQuotes()]);
   if (!programs.ok) return toast(programs.message, 'warning');
   state.programs = programs.programs;
@@ -218,6 +224,7 @@ async function loadWorkspace() {
 function showCatalog() {
   closeDashboard();
   closeCheckout();
+  closeIdentity();
   $('security').hidden = true;
   $('catalog').hidden = false;
   renderAccounts();
@@ -342,6 +349,7 @@ async function selectAccount(id) {
   const phase = entry.spec.phases.find((item) => item.id === account.phase);
   state.current = { account, spec: entry.spec, phase, events: events.ok ? events.events : [] };
   closeCheckout();
+  closeIdentity();
   $('catalog').hidden = true;
   $('security').hidden = true;
   $('dashboard').hidden = false;
@@ -882,6 +890,7 @@ async function boot() {
   initCheckout({
     closeOthers: () => {
       closeDashboard();
+      closeIdentity();
       $('catalog').hidden = true;
       $('security').hidden = true;
     },
@@ -889,6 +898,14 @@ async function boot() {
     accountsChanged: refreshAccounts,
     accounts: () => state.accounts,
     showCatalog,
+  });
+  initIdentity({
+    closeOthers: () => {
+      closeDashboard();
+      closeCheckout();
+      $('catalog').hidden = true;
+      $('security').hidden = true;
+    },
   });
   $('guide-close').addEventListener('click', () => {
     localStorage.setItem(GUIDE_KEY, '1');

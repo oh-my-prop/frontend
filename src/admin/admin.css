@@ -50,3 +50,27 @@
 .decision-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .decision-actions .primary-btn { width: auto; }
 .empty { color: var(--muted); padding: 14px 0; }
+
+/* ---- 결제·원장 ---- */
+/* 원화는 거래 계정의 가상 USD와 다른 돈이다. 표에서도 한눈에 구분되게 둔다. */
+.krw-cell { font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
+.krw-cell::after { content: ' KRW'; font-size: .66rem; font-weight: 700; color: var(--brand); letter-spacing: .06em; }
+.won-note { color: var(--brand); }
+/* 조회 전용 표다. 줄을 눌러도 아무 일이 없으므로 손 모양을 쓰지 않는다. */
+.table.plain tbody tr { cursor: default; }
+.table.plain tbody tr:hover { background: none; }
+/* 좁은 화면에서 머리글이 한 글자씩 세로로 쌓이지 않게 한다. 표 자체는 .table-wrap이 가로로 굴린다. */
+.table.plain th, .table.plain td:first-child { white-space: nowrap; }
+#money-status { width: auto; min-width: 180px; }
+.table .warn-cell { color: var(--sell); font-weight: 700; }
+.badge[data-tone="ok"] { color: var(--buy); }
+.badge[data-tone="wait"] { color: var(--warn); }
+.badge[data-tone="bad"] { color: var(--sell); }
+.badge[data-tone="info"] { color: var(--info); }
+.alert { border-left: 4px solid var(--sell); }
+.alert[data-tone="warning"] { border-left-color: var(--warn); }
+.alert h3 { font-size: .95rem; }
+.stat[data-tone="danger"] strong { color: var(--sell); }
+#reserve-line[data-tone="danger"] { color: var(--sell); font-weight: 700; }
+#reserve-line[data-tone="warning"] { color: var(--warn); font-weight: 700; }
+#money-stats { margin-bottom: 16px; }

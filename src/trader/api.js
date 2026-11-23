@@ -72,6 +72,12 @@ export const confirmOrder = (orderId, paymentKey, amountKrw) =>
   request('POST', `/api/v2/checkout/${encodeURIComponent(orderId)}/confirm`, { body: { paymentKey, amountKrw } });
 export const refundOrder = (orderId) => request('POST', `/api/v2/checkout/${encodeURIComponent(orderId)}/refund`);
 
+// 본인확인 (backend/src/identity/identity-api.js). 기능이 꺼진 서버에는 이 경로가
+// 아예 없어서 404가 돌아온다. 그것이 "이 서버에는 본인확인이 없다"는 신호다.
+export const getIdentity = () => request('GET', '/api/v2/identity');
+export const startIdentity = () => request('POST', '/api/v2/identity/start');
+export const completeIdentity = (receipt) => request('POST', '/api/v2/identity/complete', { body: receipt });
+
 // There is no real payment widget yet. These two exist only when the server runs with
 // MONEY_DEV_TOOLS (never in production); the probe is how the screen finds that out,
 // because no production endpoint reports it (backend/src/api-money.js:84).
